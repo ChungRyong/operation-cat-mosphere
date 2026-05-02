@@ -2,8 +2,8 @@ extends CharacterBody2D
 
 signal health_changed(hp: float)
 
-const MOVE_SPEED: float = 300.0
-const ATK: float = 10.0
+const BASE_MOVE_SPEED: float = 300.0
+const BASE_ATK: float = 10.0
 const ATTACK_SPEED: float = 1.2
 const ATTACK_RANGE: float = 60.0
 const PUNCH_MULTIPLIER: float = 2.0
@@ -35,7 +35,7 @@ func _physics_process(delta: float) -> void:
 		Input.get_axis("move_left", "move_right"),
 		Input.get_axis("move_up", "move_down")
 	)
-	velocity = input_dir.normalized() * MOVE_SPEED
+	velocity = input_dir.normalized() * _get_move_speed()
 	move_and_slide()
 
 	_attack_timer -= delta
@@ -58,7 +58,7 @@ func _physics_process(delta: float) -> void:
 
 func _punch() -> void:
 	_punch_cd = PUNCH_COOLDOWN
-	var damage: float = ATK * PUNCH_MULTIPLIER
+	var damage: float = _get_atk() * PUNCH_MULTIPLIER
 	var enemies: Array = get_tree().get_nodes_in_group("enemies")
 	for enemy in enemies:
 		if not is_instance_valid(enemy):
@@ -114,3 +114,19 @@ func _draw() -> void:
 	draw_rect(Rect2(bar_pos, Vector2(bar_w, 4.0)), Color(0.3, 0.0, 0.0, 1.0))
 	var hp_ratio: float = clamp(current_hp / max_hp, 0.0, 1.0)
 	draw_rect(Rect2(bar_pos, Vector2(bar_w * hp_ratio, 4.0)), Color(0.9, 0.2, 0.2, 1.0))
+
+
+func _get_atk() -> float:
+	var atk: float = BASE_ATK
+	for buff in GameManager.active_buffs:
+		if buff["type"] == "hero_atk":
+			atk *= (1.0 + buff["value"])
+	return atk
+
+
+func _get_move_speed() -> float:
+	var spd: float = BASE_MOVE_SPEED
+	for buff in GameManager.active_buffs:
+		if buff["type"] == "hero_spd":
+			spd *= (1.0 + buff["value"])
+	return spd

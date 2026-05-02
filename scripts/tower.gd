@@ -25,7 +25,7 @@ func _ready() -> void:
 	current_health = data.max_health
 	total_invested = data.build_cost
 	_update_floor_stats()
-	fire_timer.wait_time = 1.0 / max(data.fire_rate, 0.01)
+	fire_timer.wait_time = 1.0 / max(get_buffed_fire_rate(), 0.01)
 	fire_timer.one_shot = false
 	fire_timer.timeout.connect(_on_fire_timer_timeout)
 	fire_timer.start()
@@ -95,9 +95,33 @@ func set_selected(value: bool) -> void:
 func _update_floor_stats() -> void:
 	_effective_range = data.get_effective_range(floor_level)
 	_crit_chance = data.get_crit_chance(floor_level)
+	for buff in GameManager.active_buffs:
+		match buff["type"]:
+			"tower_range":
+				_effective_range *= (1.0 + buff["value"])
+			"tower_crit":
+				_crit_chance += buff["value"]
+
+
+func get_buffed_damage() -> float:
+	var dmg: float = data.damage
+	for buff in GameManager.active_buffs:
+		if buff["type"] == "tower_atk":
+			dmg *= (1.0 + buff["value"])
+	return dmg
+
+
+func get_buffed_fire_rate() -> float:
+	var rate: float = data.fire_rate
+	for buff in GameManager.active_buffs:
+		if buff["type"] == "tower_rate":
+			rate *= (1.0 + buff["value"])
+	return rate
 
 
 func _on_fire_timer_timeout() -> void:
+	if GameManager.current_phase != GameManager.GamePhase.NIGHT:
+		return
 	var target: Node2D = _find_target()
 	if target == null:
 		return
@@ -134,7 +158,7 @@ func _shoot(target: Node2D) -> void:
 	var bullet: Node2D = bullet_scene.instantiate()
 	get_tree().current_scene.add_child(bullet)
 	bullet.global_position = global_position
-	bullet.launch(target, data.damage, data.projectile_speed, data.attack_type, is_crit, data.stun_duration if _stun_cd_timer <= 0.0 else 0.0)
+	bullet.launch(target, get_buffed_damage(), data.projectile_speed, data.attack_type, is_crit, data.stun_duration if _stun_cd_timer <= 0.0 else 0.0, self)
 	if data.stun_duration > 0.0 and _stun_cd_timer <= 0.0:
 		_stun_cd_timer = data.stun_cooldown
 

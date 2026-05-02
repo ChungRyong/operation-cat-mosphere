@@ -12,17 +12,18 @@ const STEEL_CAN_GATE: EnemyData = preload("res://resources/enemies/steel_can_gat
 @export var enemy_scene: PackedScene
 
 var paths: Array[Path2D] = []
-var _alive_enemies: int = 0
 var _spawn_queue: Array = []
 var _spawning: bool = false
 var _stopped: bool = false
+var _pending_groups: int = 0
+var _elapsed: float = 0.0
 
 
 func setup_stage(stage_index: int) -> void:
 	_spawn_queue.clear()
-	_alive_enemies = 0
 	_spawning = false
 	_stopped = false
+	_pending_groups = 0
 
 	match stage_index:
 		0: _build_stage_1()
@@ -34,11 +35,19 @@ func setup_stage(stage_index: int) -> void:
 
 func start() -> void:
 	_spawning = true
+	_elapsed = 0.0
 	_process_queue()
+
+
+func _process(delta: float) -> void:
+	if _spawning:
+		_elapsed += delta
 
 
 func stop() -> void:
 	_stopped = true
+	_spawning = false
+	_pending_groups = 0
 
 
 func _build_stage_1() -> void:
@@ -92,19 +101,25 @@ func _process_queue() -> void:
 	var sorted_queue: Array = _spawn_queue.duplicate()
 	sorted_queue.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return a["time"] < b["time"])
 
-	var start_time: float = Time.get_ticks_msec() / 1000.0
 	for entry in sorted_queue:
 		var wait_until: float = entry["time"]
-		while (Time.get_ticks_msec() / 1000.0 - start_time) < wait_until:
+		while _elapsed < wait_until:
 			if _stopped:
 				return
 			await get_tree().process_frame
+		_pending_groups += 1
 		_spawn_group(entry)
 
-	while _alive_enemies > 0:
+	while _pending_groups > 0:
 		if _stopped:
 			return
 		await get_tree().process_frame
+
+	while not get_tree().get_nodes_in_group("enemies").is_empty():
+		if _stopped:
+			return
+		await get_tree().process_frame
+
 	_spawning = false
 	wave_finished.emit()
 
@@ -117,12 +132,15 @@ func _spawn_group(entry: Dictionary) -> void:
 
 	for i in count:
 		if _stopped:
+			_pending_groups -= 1
 			return
 		_spawn_one(enemy_data, path_idx)
 		if interval > 0.0 and i < count - 1:
 			await get_tree().create_timer(interval).timeout
 			if _stopped:
+				_pending_groups -= 1
 				return
+	_pending_groups -= 1
 
 
 func _spawn_one(enemy_data: EnemyData, path_index: int) -> void:
@@ -137,7 +155,6 @@ func _spawn_one(enemy_data: EnemyData, path_index: int) -> void:
 	enemy.add_to_group("enemies")
 	enemy.died.connect(_on_enemy_died)
 	enemy.reached_end.connect(_on_enemy_reached_end)
-	_alive_enemies += 1
 
 
 func _get_path(index: int) -> Path2D:
@@ -151,13 +168,8 @@ func _get_path(index: int) -> Path2D:
 
 
 func _on_enemy_died(_enemy: Node, _reward: int) -> void:
-	_alive_enemies -= 1
-	if _alive_enemies <= 0 and not _spawning:
-		all_enemies_dead.emit()
+	pass
 
 
 func _on_enemy_reached_end(damage: float) -> void:
 	GameManager.damage_base(damage)
-	_alive_enemies -= 1
-	if _alive_enemies <= 0 and not _spawning:
-		all_enemies_dead.emit()
