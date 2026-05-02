@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/enemy_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+enemy_name = "Steel Can Gate"
+enemy_class = 3
+defense_type = 2
+max_health = 400.0
+speed = 1.0
+essence_reward = 50
+color = Color(0.5, 0.5, 0.5, 1.0)
+radius = 30.0
+spawn_count = 0
+attacks_towers = true
+tower_damage = 50.0

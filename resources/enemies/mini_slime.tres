@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/enemy_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+enemy_name = "Mini Slime"
+enemy_class = 0
+defense_type = 0
+max_health = 8.0
+speed = 3.0
+essence_reward = 0
+color = Color(0.5, 1.0, 0.5, 1.0)
+radius = 8.0
+spawn_count = 0
+attacks_towers = false
+tower_damage = 0.0

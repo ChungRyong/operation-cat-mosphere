@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/enemy_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+enemy_name = "Laser Pointer"
+enemy_class = 1
+defense_type = 0
+max_health = 60.0
+speed = 2.0
+essence_reward = 15
+color = Color(1.0, 0.3, 0.3, 1.0)
+radius = 16.0
+spawn_count = 0
+attacks_towers = false
+tower_damage = 0.0
