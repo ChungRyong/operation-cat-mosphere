@@ -29,15 +29,15 @@ func _ready() -> void:
 	wave_manager.wave_finished.connect(_on_wave_finished)
 	GameManager.game_over.connect(_on_game_over)
 	GameManager.all_stages_cleared.connect(_on_all_stages_cleared)
+	GameManager.stage_started.connect(_on_stage_started)
 	hero.health_changed.connect(func(hp: float) -> void: hud.update_hero_hp(hp))
-	_start_stage(0)
+	GameManager.start_stage(0)
 
 
-func _start_stage(stage_index: int) -> void:
+func _on_stage_started(stage_index: int) -> void:
 	_current_stage = stage_index
 	_clear_enemies()
 	_build_paths(stage_index)
-	GameManager.start_stage(stage_index)
 	wave_manager.paths = _paths
 	wave_manager.setup_stage(stage_index)
 	hud.set_stage_name("Stage %d: %s" % [stage_index + 1, STAGE_NAMES[stage_index]])
