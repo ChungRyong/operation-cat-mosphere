@@ -15,9 +15,6 @@ bullet_scene = ExtResource("3")
 [node name="PathContainer" type="Node2D" parent="."]
 unique_name_in_owner = true
 
-[node name="PickupContainer" type="Node2D" parent="."]
-unique_name_in_owner = true
-
 [node name="TowerContainer" type="Node2D" parent="."]
 unique_name_in_owner = true
 

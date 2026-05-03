@@ -52,7 +52,7 @@ const ALL_BUFFS: Array[Dictionary] = [
 	{
 		"id": "scrap_bonus",
 		"name": "Scavenger",
-		"desc": "Next Stage Scrap +40",
+		"desc": "Bonus Scrap +40",
 		"type": "scrap_bonus",
 		"value": 40.0,
 		"color": Color(0.8, 0.65, 0.3),

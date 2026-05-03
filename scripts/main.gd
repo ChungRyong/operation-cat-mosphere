@@ -1,52 +1,56 @@
 extends Node2D
 
-const STAGE_NAMES: Array[String] = ["Tutorial", "Mass", "Gimmick", "Counter", "Mini-Boss"]
 const PATH_WIDTH: float = 48.0
-const SCRAP_SPAWN_COUNT: int = 8
-const SCRAP_PER_PICKUP: int = 10
+const SLOT_SNAP_RANGE: float = 50.0
+const SLOT_RADIUS: float = 22.0
 
 @export var tower_scene: PackedScene
 @export var bullet_scene: PackedScene
-
-var _scrap_pickup_scene: PackedScene = preload("res://scenes/pickup/scrap_pickup.tscn")
 
 @onready var hud: CanvasLayer = %HUD
 @onready var wave_manager: Node = %WaveManager
 @onready var hero: CharacterBody2D = %Hero
 @onready var path_container: Node2D = %PathContainer
 @onready var tower_container: Node2D = %TowerContainer
-@onready var pickup_container: Node2D = %PickupContainer
-
 var _paths: Array[Path2D] = []
 var _placing_tower: TowerData = null
 var _ghost_pos: Vector2 = Vector2.ZERO
-var _current_stage: int = 0
+var _current_map_data: MapData = null
+var _available_slots: Array[Vector2] = []
+var _selected_tower: Node2D = null
 
 
 func _ready() -> void:
 	hud.tower_selected.connect(_on_tower_selected)
 	hud.dawn_card_picked.connect(_on_dawn_card_picked)
-	hud.stage_chosen.connect(_on_stage_chosen)
+	hud.map_chosen.connect(_on_map_chosen)
 	hud.retry_requested.connect(_on_retry)
 	hud.menu_requested.connect(_on_menu)
+	hud.tower_add_floor_requested.connect(_on_tower_add_floor)
+	hud.tower_repair_requested.connect(_on_tower_repair)
+	hud.tower_sell_requested.connect(_on_tower_sell)
 	wave_manager.wave_finished.connect(_on_wave_finished)
 	GameManager.game_over.connect(_on_game_over)
-	GameManager.all_stages_cleared.connect(_on_all_stages_cleared)
-	GameManager.stage_started.connect(_on_stage_started)
+	GameManager.map_cleared.connect(_on_map_cleared)
+	GameManager.day_started.connect(_on_day_started)
 	hero.health_changed.connect(func(hp: float) -> void: hud.update_hero_hp(hp))
-	_show_stage_select()
+	_show_map_select()
 
 
-func _on_stage_started(stage_index: int) -> void:
-	_current_stage = stage_index
+func _on_day_started(day: int) -> void:
 	_clear_enemies()
-	_build_paths(stage_index)
+	_current_map_data = MapLibrary.get_map(GameManager.current_map)
+	_build_paths_for_day(day)
 	wave_manager.paths = _paths
-	wave_manager.setup_stage(stage_index)
-	hud.set_stage_name("Stage %d: %s" % [stage_index + 1, STAGE_NAMES[stage_index]])
+	if _current_map_data != null:
+		var day_data: DayData = _current_map_data.get_day_data(day)
+		wave_manager.setup_day(day_data)
+		_available_slots = _current_map_data.get_available_slots(day)
+	var map_name: String = _current_map_data.map_name if _current_map_data else "???"
+	hud.set_day_label("Day %d/%d — %s" % [day, GameManager.DAYS_PER_MAP, map_name])
 	hud.update_hero_hp(hero.current_hp)
-	hero.global_position = Vector2(640, 360)
-	_spawn_day_scrap()
+	if day == 1:
+		hero.global_position = Vector2(640, 360)
 	queue_redraw()
 
 
@@ -54,17 +58,27 @@ func _unhandled_input(event: InputEvent) -> void:
 	if GameManager.current_phase == GameManager.GamePhase.MENU:
 		return
 	if event is InputEventMouseMotion and _placing_tower != null:
-		_ghost_pos = event.position
+		var snap: Vector2 = _find_nearest_available_slot(event.position)
+		_ghost_pos = snap if snap != Vector2.ZERO else event.position
 		queue_redraw()
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
 		if _placing_tower != null:
 			_try_place_tower(event.position)
+		elif GameManager.current_phase == GameManager.GamePhase.DAY:
+			var clicked: Node2D = _find_tower_at(event.position)
+			if clicked != null:
+				_select_tower(clicked)
+			else:
+				_deselect_tower()
+				hero.move_to(event.position)
 		else:
 			hero.move_to(event.position)
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_RIGHT:
 		if _placing_tower != null:
 			_placing_tower = null
 			queue_redraw()
+		elif _selected_tower != null:
+			_deselect_tower()
 	if event.is_action_pressed("next_wave"):
 		if GameManager.current_phase == GameManager.GamePhase.DAY:
 			_transition_to_night()
@@ -72,40 +86,10 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _transition_to_night() -> void:
 	_placing_tower = null
-	_clear_pickups()
+	_deselect_tower()
 	GameManager.start_night()
 	wave_manager.start()
 	queue_redraw()
-
-
-func _spawn_day_scrap() -> void:
-	_clear_pickups()
-	for i in SCRAP_SPAWN_COUNT:
-		var pickup: Area2D = _scrap_pickup_scene.instantiate()
-		pickup.amount = SCRAP_PER_PICKUP
-		pickup.global_position = _random_field_position()
-		pickup_container.add_child(pickup)
-
-
-func _random_field_position() -> Vector2:
-	for attempt in 30:
-		var pos := Vector2(randf_range(60, 1220), randf_range(60, 660))
-		var too_close: bool = false
-		for p in _paths:
-			if p.curve == null:
-				continue
-			var closest: Vector2 = p.curve.get_closest_point(pos)
-			if pos.distance_to(closest) < PATH_WIDTH + 30.0:
-				too_close = true
-				break
-		if not too_close:
-			return pos
-	return Vector2(randf_range(60, 1220), randf_range(60, 660))
-
-
-func _clear_pickups() -> void:
-	for child in pickup_container.get_children():
-		child.queue_free()
 
 
 func _clear_enemies() -> void:
@@ -120,7 +104,7 @@ func _on_wave_finished() -> void:
 
 func _on_dawn_card_picked(buff: Dictionary) -> void:
 	_apply_buff(buff)
-	GameManager.advance_to_next_stage()
+	GameManager.advance_to_next_day()
 
 
 func _apply_buff(buff: Dictionary) -> void:
@@ -136,38 +120,38 @@ func _apply_buff(buff: Dictionary) -> void:
 			GameManager.base_hp += buff["value"]
 
 
-func _on_all_stages_cleared() -> void:
-	hud.show_all_clear()
+func _on_map_cleared(_map_index: int) -> void:
+	hud.show_map_clear()
 
 
 func _on_game_over() -> void:
 	wave_manager.stop()
 
 
-func _show_stage_select() -> void:
+func _show_map_select() -> void:
 	GameManager.set_phase(GameManager.GamePhase.MENU)
-	hud.show_stage_select(GameManager.highest_unlocked_stage)
+	hud.show_map_select(GameManager.highest_unlocked_map)
 
 
-func _on_stage_chosen(stage_index: int) -> void:
+func _on_map_chosen(map_index: int) -> void:
 	_reset_gameplay()
-	GameManager.start_stage(stage_index)
+	GameManager.start_map(map_index)
 
 
 func _on_retry() -> void:
 	_reset_gameplay()
-	GameManager.start_stage(_current_stage)
+	GameManager.start_map(GameManager.current_map)
 
 
 func _on_menu() -> void:
 	_reset_gameplay()
-	_show_stage_select()
+	_show_map_select()
 
 
 func _reset_gameplay() -> void:
 	_placing_tower = null
+	_deselect_tower()
 	_clear_enemies()
-	_clear_pickups()
 	wave_manager.stop()
 	for tower in tower_container.get_children():
 		tower.queue_free()
@@ -176,40 +160,108 @@ func _reset_gameplay() -> void:
 	hud.reset_speed()
 
 
+func _find_tower_at(pos: Vector2) -> Node2D:
+	var nearest: Node2D = null
+	var nearest_dist: float = 40.0
+	for tower in tower_container.get_children():
+		if not is_instance_valid(tower):
+			continue
+		var dist: float = pos.distance_to(tower.global_position)
+		if dist < nearest_dist:
+			nearest = tower
+			nearest_dist = dist
+	return nearest
+
+
+func _select_tower(tower: Node2D) -> void:
+	if _selected_tower == tower:
+		return
+	_deselect_tower()
+	_selected_tower = tower
+	tower.set_selected(true)
+	hud.show_tower_info(tower)
+
+
+func _deselect_tower() -> void:
+	if _selected_tower != null and is_instance_valid(_selected_tower):
+		_selected_tower.set_selected(false)
+	_selected_tower = null
+	hud.hide_tower_info()
+
+
+func _on_tower_add_floor(floor_data: TowerData) -> void:
+	if _selected_tower == null or not is_instance_valid(_selected_tower):
+		return
+	if _selected_tower.add_floor(floor_data):
+		hud.update_tower_info(_selected_tower)
+
+
+func _on_tower_repair() -> void:
+	if _selected_tower == null or not is_instance_valid(_selected_tower):
+		return
+	if _selected_tower.repair():
+		hud.update_tower_info(_selected_tower)
+
+
+func _on_tower_sell() -> void:
+	if _selected_tower == null or not is_instance_valid(_selected_tower):
+		return
+	var refund: int = _selected_tower.get_sell_value()
+	ResourceManager.add_scrap(refund)
+	_selected_tower.queue_free()
+	_selected_tower = null
+	hud.hide_tower_info()
+	queue_redraw()
+
+
 func _on_tower_selected(tower_data: TowerData) -> void:
 	if GameManager.is_game_over:
 		return
 	if GameManager.current_phase != GameManager.GamePhase.DAY:
 		return
+	_deselect_tower()
 	_placing_tower = tower_data
 
 
-func _try_place_tower(pos: Vector2) -> void:
+func _try_place_tower(click_pos: Vector2) -> void:
 	if _placing_tower == null:
 		return
-	if not _is_valid_placement(pos):
+	var snap_pos: Vector2 = _find_nearest_available_slot(click_pos)
+	if snap_pos == Vector2.ZERO:
+		return
+	if click_pos.distance_to(snap_pos) > SLOT_SNAP_RANGE:
 		return
 	if not ResourceManager.spend_scrap(_placing_tower.build_cost):
 		return
 	var tower: Node2D = tower_scene.instantiate()
 	tower.data = _placing_tower
 	tower.bullet_scene = bullet_scene
-	tower.global_position = pos
+	tower.global_position = snap_pos
 	tower_container.add_child(tower)
 	_placing_tower = null
 	queue_redraw()
 
 
-func _is_valid_placement(pos: Vector2) -> bool:
-	for p in _paths:
-		var curve: Curve2D = p.curve
-		var closest: Vector2 = curve.get_closest_point(pos)
-		if pos.distance_to(closest) < PATH_WIDTH + 20.0:
-			return false
+func _find_nearest_available_slot(pos: Vector2) -> Vector2:
+	var nearest: Vector2 = Vector2.ZERO
+	var nearest_dist: float = INF
+	for slot in _available_slots:
+		if _is_slot_occupied(slot):
+			continue
+		var dist: float = pos.distance_to(slot)
+		if dist < nearest_dist:
+			nearest = slot
+			nearest_dist = dist
+	return nearest
+
+
+func _is_slot_occupied(slot_pos: Vector2) -> bool:
 	for tower in tower_container.get_children():
-		if pos.distance_to(tower.global_position) < 50.0:
-			return false
-	return true
+		if not is_instance_valid(tower):
+			continue
+		if tower.global_position.distance_to(slot_pos) < SLOT_RADIUS:
+			return true
+	return false
 
 
 func _on_enemy_died(_enemy: Node, _reward: int) -> void:
@@ -220,13 +272,15 @@ func _on_enemy_reached_end(damage: float) -> void:
 	GameManager.damage_base(damage)
 
 
-func _build_paths(stage_index: int) -> void:
+func _build_paths_for_day(day: int) -> void:
 	for child in path_container.get_children():
 		child.queue_free()
 	_paths.clear()
 
-	var all_path_data: Array = _get_stage_paths(stage_index)
-	for points in all_path_data:
+	if _current_map_data == null:
+		return
+	var active: Array[PackedVector2Array] = _current_map_data.get_active_paths(day)
+	for points in active:
 		var p := Path2D.new()
 		var curve := Curve2D.new()
 		for pt in points:
@@ -236,27 +290,10 @@ func _build_paths(stage_index: int) -> void:
 		_paths.append(p)
 
 
-func _get_stage_paths(stage_index: int) -> Array:
-	match stage_index:
-		0:
-			return [[Vector2(0, 360), Vector2(400, 360), Vector2(400, 200), Vector2(880, 200), Vector2(880, 500), Vector2(1280, 500)]]
-		1:
-			return [[Vector2(0, 300), Vector2(320, 300), Vector2(640, 500), Vector2(960, 300), Vector2(1280, 300)]]
-		2:
-			return [[Vector2(0, 360), Vector2(250, 180), Vector2(500, 540), Vector2(750, 180), Vector2(1000, 540), Vector2(1280, 360)]]
-		3:
-			return [[Vector2(0, 360), Vector2(350, 360), Vector2(640, 200), Vector2(930, 360), Vector2(1280, 360)]]
-		4:
-			return [
-				[Vector2(0, 200), Vector2(400, 200), Vector2(640, 360), Vector2(1000, 360), Vector2(1280, 360)],
-				[Vector2(0, 520), Vector2(400, 520), Vector2(640, 360), Vector2(1000, 360), Vector2(1280, 360)],
-			]
-	return [[Vector2(0, 360), Vector2(1280, 360)]]
-
-
 func _draw() -> void:
 	_draw_background()
 	_draw_paths()
+	_draw_slots()
 	_draw_base()
 	if _placing_tower != null:
 		_draw_ghost()
@@ -292,18 +329,31 @@ func _draw_paths() -> void:
 			draw_line(points[i], points[i + 1], Color(0.35, 0.3, 0.45, 1.0), PATH_WIDTH - 8.0)
 
 
+func _draw_slots() -> void:
+	if GameManager.current_phase != GameManager.GamePhase.DAY:
+		return
+	for slot in _available_slots:
+		var occupied: bool = _is_slot_occupied(slot)
+		if occupied:
+			draw_arc(slot, SLOT_RADIUS, 0.0, TAU, 24, Color(0.5, 0.5, 0.5, 0.2), 1.5)
+		else:
+			draw_arc(slot, SLOT_RADIUS, 0.0, TAU, 24, Color(0.3, 1.0, 0.5, 0.4), 2.0)
+			draw_arc(slot, SLOT_RADIUS - 4.0, 0.0, TAU, 24, Color(0.3, 1.0, 0.5, 0.15), 1.0)
+
+
 func _draw_base() -> void:
 	if _paths.is_empty():
 		return
-	var last_curve: Curve2D = _paths[0].curve
-	var base_pos := Vector2(1240, last_curve.get_point_position(last_curve.point_count - 1).y)
+	var base_pos := Vector2(1240, 500)
 	draw_rect(Rect2(base_pos.x - 30, base_pos.y - 30, 60, 60), Color(0.9, 0.7, 0.2, 1.0))
 	draw_rect(Rect2(base_pos.x - 30, base_pos.y - 30, 60, 60), Color(1.0, 0.85, 0.3, 1.0), false, 2.0)
 
 
 func _draw_ghost() -> void:
-	var valid: bool = _is_valid_placement(_ghost_pos)
+	var snap: Vector2 = _find_nearest_available_slot(_ghost_pos)
+	var draw_pos: Vector2 = snap if snap != Vector2.ZERO and _ghost_pos.distance_to(snap) <= SLOT_SNAP_RANGE else _ghost_pos
+	var valid: bool = snap != Vector2.ZERO and _ghost_pos.distance_to(snap) <= SLOT_SNAP_RANGE
 	var color := Color(0.3, 1.0, 0.3, 0.4) if valid else Color(1.0, 0.3, 0.3, 0.4)
-	draw_circle(_ghost_pos, 24.0, color)
+	draw_circle(draw_pos, 24.0, color)
 	var range_val: float = _placing_tower.attack_range if _placing_tower != null else 100.0
-	draw_arc(_ghost_pos, range_val, 0.0, TAU, 48, Color(1.0, 1.0, 1.0, 0.2), 1.0)
+	draw_arc(draw_pos, range_val, 0.0, TAU, 48, Color(1.0, 1.0, 1.0, 0.2), 1.0)

@@ -48,10 +48,10 @@
 
 **Goal:** Full tower management during gameplay
 
-- [ ] Click tower to select -> info panel (HP/DPS/floor level)
-- [ ] Add floor button (cost display, max 5)
-- [ ] Repair button (repair_cost deduction)
-- [ ] Sell button (50% refund)
+- [x] Click tower to select -> info panel (HP/DPS/floor level)
+- [x] Add floor button (cost display, max 5)
+- [x] Repair button (repair_cost deduction)
+- [x] Sell button (50% refund)
 - [ ] Build Mode toggle (B key wired up)
 
 ## Phase 4 - Growth Systems
@@ -92,11 +92,11 @@
 
 **Goal:** P0의 5스테이지 구조를 맵당 20일 로그라이크 루프로 확장
 
-- [ ] GameManager 리팩터: Stage → Day(1~20) 주기로 전환
-- [ ] 동적 경로 확장: Day 5/11/16에서 새 침공 경로 개방 (1→2→3→4)
-- [ ] 슬롯 기반 타워 배치: 자유 배치 → 고정 건설 슬롯 (Day별 1→2→3→4 확장)
-- [ ] WaveManager 리팩터: Day별 웨이브 데이터를 리소스 파일(.tres)로 분리
-- [ ] 실패 시 해당 맵 Day 1 리셋 (로그라이크 A-Type)
+- [x] GameManager 리팩터: Stage → Day(1~20) 주기로 전환
+- [x] 동적 경로 확장: Day 5/11/16에서 새 침공 경로 개방 (1→2→3→4)
+- [x] 슬롯 기반 타워 배치: 자유 배치 → 고정 건설 슬롯 (Day별 1→2→3→4 확장)
+- [x] WaveManager 리팩터: Day별 웨이브 데이터를 Resource 구조 (WaveGroupData/DayData/MapData)
+- [x] 실패 시 해당 맵 Day 1 리셋 (로그라이크 A-Type)
 
 ## Phase 8 - Meta Progression & Economy
 

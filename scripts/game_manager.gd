@@ -1,33 +1,53 @@
 extends Node
 
 signal phase_changed(new_phase: GamePhase)
-signal stage_started(stage_index: int)
+signal day_started(day: int)
 signal game_over
 signal base_damaged(remaining_hp: float)
-signal stage_cleared(stage_index: int)
-signal all_stages_cleared
+signal day_cleared(day: int)
+signal map_cleared(map_index: int)
 
 enum GamePhase { DAY, NIGHT, DAWN, MENU }
 
 const NIGHT_DURATION: float = 120.0
 const BASE_HP: float = 100.0
-const TOTAL_STAGES: int = 5
+const DAYS_PER_MAP: int = 20
 
 var current_phase: GamePhase = GamePhase.MENU
-var current_stage: int = 0
+var current_map: int = 0
+var current_day: int = 1
 var night_timer: float = 0.0
 var base_hp: float = BASE_HP
 var is_game_over: bool = false
 var active_buffs: Array[Dictionary] = []
-var highest_unlocked_stage: int = 0
+var highest_unlocked_map: int = 0
 
 
-func start_stage(stage_index: int) -> void:
-	current_stage = stage_index
+func start_map(map_index: int) -> void:
+	current_map = map_index
+	current_day = 1
 	is_game_over = false
 	base_hp = BASE_HP
-	ResourceManager.reset_for_stage(stage_index)
-	stage_started.emit(stage_index)
+	active_buffs.clear()
+	var map_data: MapData = MapLibrary.get_map(map_index)
+	if map_data != null:
+		ResourceManager.reset_for_map(map_data.starting_scrap)
+	else:
+		ResourceManager.reset_for_map(200)
+	day_started.emit(current_day)
+	set_phase(GamePhase.DAY)
+
+
+func start_day(day: int) -> void:
+	current_day = day
+	is_game_over = false
+	base_hp = BASE_HP
+	var map_data: MapData = MapLibrary.get_map(current_map)
+	if map_data != null:
+		var day_data: DayData = map_data.get_day_data(day)
+		if day_data != null:
+			ResourceManager.add_daily_scrap(day_data.daily_scrap)
+	day_started.emit(current_day)
 	set_phase(GamePhase.DAY)
 
 
@@ -44,16 +64,16 @@ func start_night() -> void:
 
 func complete_night() -> void:
 	ResourceManager.add_wave_clear_bonus()
-	highest_unlocked_stage = maxi(highest_unlocked_stage, current_stage + 1)
-	stage_cleared.emit(current_stage)
+	day_cleared.emit(current_day)
 	set_phase(GamePhase.DAWN)
 
 
-func advance_to_next_stage() -> void:
-	if current_stage + 1 >= TOTAL_STAGES:
-		all_stages_cleared.emit()
+func advance_to_next_day() -> void:
+	if current_day >= DAYS_PER_MAP:
+		highest_unlocked_map = maxi(highest_unlocked_map, current_map + 1)
+		map_cleared.emit(current_map)
 		return
-	start_stage(current_stage + 1)
+	start_day(current_day + 1)
 
 
 func apply_buff(buff: Dictionary) -> void:

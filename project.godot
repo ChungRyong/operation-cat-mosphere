@@ -26,6 +26,7 @@ DamageCalculator="*res://scripts/damage_calculator.gd"
 SfxManager="*res://scripts/sfx_manager.gd"
 BuffLibrary="*res://scripts/buff_library.gd"
 EnemyPool="*res://scripts/enemy_pool.gd"
+MapLibrary="*res://scripts/map_library.gd"
 
 [display]
 

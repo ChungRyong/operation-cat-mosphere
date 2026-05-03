@@ -1,13 +1,6 @@
 extends Node
 
 signal wave_finished
-signal all_enemies_dead
-
-const JELLY_SLIME: EnemyData = preload("res://resources/enemies/jelly_slime.tres")
-const JELLY_CARRIER: EnemyData = preload("res://resources/enemies/jelly_carrier.tres")
-const LASER_POINTER: EnemyData = preload("res://resources/enemies/laser_pointer.tres")
-const MIRROR_CRAFT: EnemyData = preload("res://resources/enemies/mirror_craft.tres")
-const STEEL_CAN_GATE: EnemyData = preload("res://resources/enemies/steel_can_gate.tres")
 
 var paths: Array[Path2D] = []
 var _spawn_queue: Array = []
@@ -17,18 +10,21 @@ var _pending_groups: int = 0
 var _elapsed: float = 0.0
 
 
-func setup_stage(stage_index: int) -> void:
+func setup_day(day_data: DayData) -> void:
 	_spawn_queue.clear()
 	_spawning = false
 	_stopped = false
 	_pending_groups = 0
-
-	match stage_index:
-		0: _build_stage_1()
-		1: _build_stage_2()
-		2: _build_stage_3()
-		3: _build_stage_4()
-		4: _build_stage_5()
+	if day_data == null:
+		return
+	for wg in day_data.wave_groups:
+		_spawn_queue.append({
+			"time": wg.spawn_time,
+			"enemy": wg.enemy,
+			"count": wg.count,
+			"interval": wg.interval,
+			"path_index": wg.path_index,
+		})
 
 
 func start() -> void:
@@ -46,53 +42,6 @@ func stop() -> void:
 	_stopped = true
 	_spawning = false
 	_pending_groups = 0
-
-
-func _build_stage_1() -> void:
-	_q(0.0, JELLY_SLIME, 20, 3.0, 0)
-	_q(65.0, JELLY_SLIME, 20, 2.75, 0)
-
-
-func _build_stage_2() -> void:
-	_q(0.0, JELLY_SLIME, 25, 2.0, 0)
-	_q(55.0, JELLY_SLIME, 15, 1.3, 0)
-	_q(80.0, JELLY_CARRIER, 2, 3.0, 0)
-	_q(90.0, JELLY_SLIME, 10, 3.0, 0)
-
-
-func _build_stage_3() -> void:
-	_q(0.0, JELLY_SLIME, 15, 1.7, 0)
-	_q(30.0, LASER_POINTER, 2, 1.0, 0)
-	_q(35.0, JELLY_SLIME, 25, 2.0, 0)
-	_q(90.0, LASER_POINTER, 3, 1.0, 0)
-	_q(95.0, JELLY_SLIME, 10, 2.5, 0)
-
-
-func _build_stage_4() -> void:
-	_q(0.0, JELLY_SLIME, 15, 2.0, 0)
-	_q(35.0, MIRROR_CRAFT, 5, 5.0, 0)
-	_q(65.0, MIRROR_CRAFT, 3, 4.0, 0)
-	_q(65.0, JELLY_SLIME, 15, 1.7, 0)
-	_q(95.0, MIRROR_CRAFT, 4, 6.0, 0)
-
-
-func _build_stage_5() -> void:
-	_q(0.0, JELLY_SLIME, 20, 2.0, -1)
-	_q(45.0, JELLY_CARRIER, 3, 8.0, 0)
-	_q(45.0, MIRROR_CRAFT, 4, 6.0, 1)
-	_q(75.0, LASER_POINTER, 3, 7.0, -1)
-	_q(100.0, STEEL_CAN_GATE, 3, 4.0, 1)
-	_q(105.0, JELLY_SLIME, 10, 1.5, -1)
-
-
-func _q(time: float, enemy: EnemyData, count: int, interval: float, path_index: int) -> void:
-	_spawn_queue.append({
-		"time": time,
-		"enemy": enemy,
-		"count": count,
-		"interval": interval,
-		"path_index": path_index,
-	})
 
 
 func _process_queue() -> void:

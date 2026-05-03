@@ -5,18 +5,18 @@ signal destroyed
 @export var data: TowerData
 @export var bullet_scene: PackedScene
 
+var floors: Array[TowerData] = []
 var floor_level: int = 1
 var current_health: float = 0.0
 var total_invested: int = 0
 var is_selected: bool = false
 
-var _effective_range: float = 0.0
-var _crit_chance: float = 0.0
-var _stun_cd_timer: float = 0.0
+var _floor_timers: Array[float] = []
+var _floor_stun_cds: Array[float] = []
+var _floor_ranges: Array[float] = []
+var _floor_crits: Array[float] = []
 var _collapsing: bool = false
 var _collapse_timer: float = 0.0
-
-@onready var fire_timer: Timer = %FireTimer
 
 
 func _ready() -> void:
@@ -25,40 +25,68 @@ func _ready() -> void:
 		return
 	current_health = data.max_health
 	total_invested = data.build_cost
+	floors.append(data)
+	_floor_timers.append(0.0)
+	_floor_stun_cds.append(0.0)
 	_update_floor_stats()
-	fire_timer.wait_time = 1.0 / max(get_buffed_fire_rate(), 0.01)
-	fire_timer.one_shot = false
-	fire_timer.timeout.connect(_on_fire_timer_timeout)
-	fire_timer.start()
 	queue_redraw()
 
 
 func _process(delta: float) -> void:
-	if _stun_cd_timer > 0.0:
-		_stun_cd_timer -= delta
+	if data == null:
+		return
+	for i in _floor_stun_cds.size():
+		if _floor_stun_cds[i] > 0.0:
+			_floor_stun_cds[i] -= delta
+
 	if _collapsing:
 		_collapse_timer -= delta
-		if _collapse_timer <= 0.0 and floor_level > 1:
-			floor_level -= 1
-			_update_floor_stats()
+		if _collapse_timer <= 0.0 and floors.size() > 1:
+			floors.pop_back()
+			_floor_timers.pop_back()
+			_floor_stun_cds.pop_back()
+			_floor_ranges.pop_back()
+			_floor_crits.pop_back()
+			floor_level = floors.size()
 			queue_redraw()
 			if current_health > data.max_health * TowerData.COLLAPSE_THRESHOLD:
 				_collapsing = false
 			else:
 				_collapse_timer = 2.0
 
+	if GameManager.current_phase != GameManager.GamePhase.NIGHT:
+		return
+	for i in floors.size():
+		_floor_timers[i] -= delta
+		if _floor_timers[i] <= 0.0:
+			var fd: TowerData = floors[i]
+			_floor_timers[i] = 1.0 / max(_get_buffed_fire_rate(fd), 0.01)
+			var target: Node2D = _find_target(i)
+			if target != null:
+				_shoot(i, target)
 
-func add_floor() -> bool:
-	if floor_level >= 5:
+
+func add_floor(floor_data: TowerData) -> bool:
+	if floors.size() >= 5:
 		return false
-	var cost: int = data.get_floor_cost(floor_level + 1)
+	var cost: int = get_add_floor_cost(floor_data)
 	if not ResourceManager.spend_scrap(cost):
 		return false
-	floor_level += 1
+	floors.append(floor_data)
+	_floor_timers.append(0.0)
+	_floor_stun_cds.append(0.0)
 	total_invested += cost
+	floor_level = floors.size()
 	_update_floor_stats()
 	queue_redraw()
 	return true
+
+
+func get_add_floor_cost(floor_data: TowerData) -> int:
+	var next_level: int = floors.size() + 1
+	if next_level == 5:
+		return floor_data.build_cost * 2
+	return floor_data.build_cost * next_level
 
 
 func repair() -> bool:
@@ -79,7 +107,7 @@ func take_damage(amount: float) -> void:
 		destroyed.emit()
 		queue_free()
 		return
-	if not _collapsing and current_health <= data.max_health * TowerData.COLLAPSE_THRESHOLD and floor_level > 1:
+	if not _collapsing and current_health <= data.max_health * TowerData.COLLAPSE_THRESHOLD and floors.size() > 1:
 		_collapsing = true
 		_collapse_timer = 2.0
 
@@ -93,54 +121,65 @@ func set_selected(value: bool) -> void:
 	queue_redraw()
 
 
+func get_total_dps() -> float:
+	var total: float = 0.0
+	for fd in floors:
+		total += _get_buffed_damage(fd) * _get_buffed_fire_rate(fd)
+	return total
+
+
+func get_max_range() -> float:
+	var max_r: float = 0.0
+	for r in _floor_ranges:
+		if r > max_r:
+			max_r = r
+	return max_r
+
+
 func _update_floor_stats() -> void:
-	_effective_range = data.get_effective_range(floor_level)
-	_crit_chance = data.get_crit_chance(floor_level)
-	for buff in GameManager.active_buffs:
-		match buff["type"]:
-			"tower_range":
-				_effective_range *= (1.0 + buff["value"])
-			"tower_crit":
-				_crit_chance += buff["value"]
+	_floor_ranges.clear()
+	_floor_crits.clear()
+	for i in floors.size():
+		var fd: TowerData = floors[i]
+		var r: float = fd.attack_range * (1.0 + i * TowerData.RANGE_BONUS_PER_FLOOR)
+		var c: float = TowerData.CRIT_BASE + i * TowerData.CRIT_PER_FLOOR
+		for buff in GameManager.active_buffs:
+			match buff["type"]:
+				"tower_range": r *= (1.0 + buff["value"])
+				"tower_crit": c += buff["value"]
+		_floor_ranges.append(r)
+		_floor_crits.append(c)
 
 
-func get_buffed_damage() -> float:
-	var dmg: float = data.damage
+func _get_buffed_damage(floor_data: TowerData) -> float:
+	var dmg: float = floor_data.damage
 	for buff in GameManager.active_buffs:
 		if buff["type"] == "tower_atk":
 			dmg *= (1.0 + buff["value"])
 	return dmg
 
 
-func get_buffed_fire_rate() -> float:
-	var rate: float = data.fire_rate
+func _get_buffed_fire_rate(floor_data: TowerData) -> float:
+	var rate: float = floor_data.fire_rate
 	for buff in GameManager.active_buffs:
 		if buff["type"] == "tower_rate":
 			rate *= (1.0 + buff["value"])
 	return rate
 
 
-func _on_fire_timer_timeout() -> void:
-	if GameManager.current_phase != GameManager.GamePhase.NIGHT:
-		return
-	var target: Node2D = _find_target()
-	if target == null:
-		return
-	_shoot(target)
-
-
-func _find_target() -> Node2D:
+func _find_target(floor_index: int) -> Node2D:
 	var enemies: Array = get_tree().get_nodes_in_group("enemies")
+	var effective_range: float = _floor_ranges[floor_index]
 	var closest_distractor: Node2D = null
-	var closest_distractor_dist: float = _effective_range
+	var closest_distractor_dist: float = effective_range
 	var closest: Node2D = null
-	var closest_dist: float = _effective_range
+	var closest_dist: float = effective_range
 
 	for enemy in enemies:
 		if not is_instance_valid(enemy):
 			continue
 		var dist: float = global_position.distance_to(enemy.global_position)
-		if dist > _effective_range:
+		if dist > effective_range:
 			continue
 		if enemy is PathFollow2D and enemy._distract_active and enemy.is_gimmick_distractor():
 			if dist < closest_distractor_dist:
@@ -153,36 +192,42 @@ func _find_target() -> Node2D:
 	return closest_distractor if closest_distractor != null else closest
 
 
-func _shoot(target: Node2D) -> void:
+func _shoot(floor_index: int, target: Node2D) -> void:
 	if bullet_scene == null:
 		return
-	var is_crit: bool = randf() < _crit_chance
+	var fd: TowerData = floors[floor_index]
+	var is_crit: bool = randf() < _floor_crits[floor_index]
+	var can_stun: bool = fd.stun_duration > 0.0 and _floor_stun_cds[floor_index] <= 0.0
+	var stun_val: float = fd.stun_duration if can_stun else 0.0
+
 	var bullet: Node2D = bullet_scene.instantiate()
 	get_tree().current_scene.add_child(bullet)
 	bullet.global_position = global_position
-	bullet.launch(target, get_buffed_damage(), data.projectile_speed, data.attack_type, is_crit, data.stun_duration if _stun_cd_timer <= 0.0 else 0.0, self)
-	if data.stun_duration > 0.0 and _stun_cd_timer <= 0.0:
-		_stun_cd_timer = data.stun_cooldown
+	bullet.launch(target, _get_buffed_damage(fd), fd.projectile_speed, fd.attack_type, is_crit, stun_val, self)
+
+	if can_stun:
+		_floor_stun_cds[floor_index] = fd.stun_cooldown
 
 
 func _draw() -> void:
 	if data == null:
 		return
-	var floor_scale: float = 1.0 + (floor_level - 1) * 0.1
+	var floor_scale: float = 1.0 + (floors.size() - 1) * 0.1
 	var half: float = 24.0 * floor_scale
-	for i in floor_level:
+	for i in floors.size():
 		var y_offset: float = -i * 12.0
-		var floor_color: Color = data.color
-		if i == floor_level - 1 and floor_level == 5:
+		var floor_color: Color = floors[i].color
+		if i == floors.size() - 1 and floors.size() == 5:
 			floor_color = floor_color.lightened(0.3)
 		draw_rect(Rect2(-half, y_offset - 12.0, half * 2.0, 12.0), floor_color)
 		draw_rect(Rect2(-half, y_offset - 12.0, half * 2.0, 12.0), Color(0.0, 0.0, 0.0, 0.5), false, 1.0)
 
+	var max_range: float = get_max_range()
 	var range_alpha: float = 0.3 if is_selected else 0.1
-	draw_arc(Vector2.ZERO, _effective_range, 0.0, TAU, 48, Color(1.0, 1.0, 1.0, range_alpha), 1.0)
+	draw_arc(Vector2.ZERO, max_range, 0.0, TAU, 48, Color(1.0, 1.0, 1.0, range_alpha), 1.0)
 
 	if is_selected:
-		draw_rect(Rect2(-half - 2, -(floor_level * 12.0) - 2, (half + 2) * 2.0, floor_level * 12.0 + 4), Color(1.0, 1.0, 1.0, 0.6), false, 2.0)
+		draw_rect(Rect2(-half - 2, -(floors.size() * 12.0) - 2, (half + 2) * 2.0, floors.size() * 12.0 + 4), Color(1.0, 1.0, 1.0, 0.6), false, 2.0)
 
 	var hp_ratio: float = clamp(current_health / data.max_health, 0.0, 1.0)
 	var bar_w: float = half * 2.0
