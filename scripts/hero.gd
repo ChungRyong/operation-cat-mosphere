@@ -195,6 +195,22 @@ func reset_blocked() -> void:
 	_blocked_count = 0
 
 
+func reset_stats() -> void:
+	max_hp = 100.0
+	current_hp = max_hp
+	ultimate_available = true
+	_attack_timer = 0.0
+	_punch_cd = 0.0
+	_parry_cd = 0.0
+	_parry_active = 0.0
+	_invincible_timer = 0.0
+	_auto_atk_timer = 0.0
+	_blocked_count = 0
+	_moving = false
+	velocity = Vector2.ZERO
+	health_changed.emit(current_hp)
+
+
 func _on_phase_changed(_phase: GameManager.GamePhase) -> void:
 	if _phase != GameManager.GamePhase.NIGHT:
 		reset_blocked()

@@ -19,6 +19,7 @@ var night_timer: float = 0.0
 var base_hp: float = BASE_HP
 var is_game_over: bool = false
 var active_buffs: Array[Dictionary] = []
+var highest_unlocked_stage: int = 0
 
 
 func start_stage(stage_index: int) -> void:
@@ -43,6 +44,7 @@ func start_night() -> void:
 
 func complete_night() -> void:
 	ResourceManager.add_wave_clear_bonus()
+	highest_unlocked_stage = maxi(highest_unlocked_stage, current_stage + 1)
 	stage_cleared.emit(current_stage)
 	set_phase(GamePhase.DAWN)
 

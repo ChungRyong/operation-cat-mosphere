@@ -26,12 +26,15 @@ var _current_stage: int = 0
 func _ready() -> void:
 	hud.tower_selected.connect(_on_tower_selected)
 	hud.dawn_card_picked.connect(_on_dawn_card_picked)
+	hud.stage_chosen.connect(_on_stage_chosen)
+	hud.retry_requested.connect(_on_retry)
+	hud.menu_requested.connect(_on_menu)
 	wave_manager.wave_finished.connect(_on_wave_finished)
 	GameManager.game_over.connect(_on_game_over)
 	GameManager.all_stages_cleared.connect(_on_all_stages_cleared)
 	GameManager.stage_started.connect(_on_stage_started)
 	hero.health_changed.connect(func(hp: float) -> void: hud.update_hero_hp(hp))
-	GameManager.start_stage(0)
+	_show_stage_select()
 
 
 func _on_stage_started(stage_index: int) -> void:
@@ -48,6 +51,8 @@ func _on_stage_started(stage_index: int) -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	if GameManager.current_phase == GameManager.GamePhase.MENU:
+		return
 	if event is InputEventMouseMotion and _placing_tower != null:
 		_ghost_pos = event.position
 		queue_redraw()
@@ -138,6 +143,38 @@ func _on_all_stages_cleared() -> void:
 
 func _on_game_over() -> void:
 	wave_manager.stop()
+
+
+func _show_stage_select() -> void:
+	GameManager.set_phase(GameManager.GamePhase.MENU)
+	hud.show_stage_select(GameManager.highest_unlocked_stage)
+
+
+func _on_stage_chosen(stage_index: int) -> void:
+	_reset_gameplay()
+	GameManager.start_stage(stage_index)
+
+
+func _on_retry() -> void:
+	_reset_gameplay()
+	GameManager.start_stage(_current_stage)
+
+
+func _on_menu() -> void:
+	_reset_gameplay()
+	_show_stage_select()
+
+
+func _reset_gameplay() -> void:
+	_placing_tower = null
+	_clear_enemies()
+	_clear_pickups()
+	wave_manager.stop()
+	for tower in tower_container.get_children():
+		tower.queue_free()
+	GameManager.active_buffs.clear()
+	hero.reset_stats()
+	hud.reset_speed()
 
 
 func _on_tower_selected(tower_data: TowerData) -> void:

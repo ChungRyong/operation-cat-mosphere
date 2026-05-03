@@ -3,6 +3,11 @@ extends CanvasLayer
 signal tower_selected(tower_data: TowerData)
 signal dawn_card_picked(buff: Dictionary)
 signal night_requested
+signal stage_chosen(stage_index: int)
+signal retry_requested
+signal menu_requested
+
+const STAGE_NAMES: Array[String] = ["Tutorial", "Mass", "Gimmick", "Counter", "Mini-Boss"]
 
 @onready var scrap_label: Label = %ScrapLabel
 @onready var essence_label: Label = %EssenceLabel
@@ -20,6 +25,10 @@ signal night_requested
 @onready var speed_button: Button = %SpeedButton
 
 var _tower_buttons: Array[Button] = []
+var _stage_select_panel: Panel
+var _stage_buttons: Array[Button] = []
+var _retry_button: Button
+var _menu_button: Button
 const SPEED_STEPS: Array[float] = [1.0, 2.0, 4.0]
 var _speed_index: int = 0
 
@@ -35,6 +44,8 @@ func _ready() -> void:
 	day_hint_label.visible = false
 	speed_button.pressed.connect(_on_speed_pressed)
 	_setup_tower_buttons()
+	_setup_stage_select_panel()
+	_setup_gameover_buttons()
 
 
 func _process(_delta: float) -> void:
@@ -70,16 +81,35 @@ func show_dawn_cards(cards: Array[Dictionary]) -> void:
 func show_all_clear() -> void:
 	game_over_panel.visible = true
 	result_label.text = "ALL STAGES CLEAR!"
+	_retry_button.visible = false
+	_menu_button.visible = true
+
+
+func show_stage_select(highest_unlocked: int) -> void:
+	for i in _stage_buttons.size():
+		_stage_buttons[i].disabled = i > highest_unlocked
+	_stage_select_panel.visible = true
+	game_over_panel.visible = false
+	dawn_panel.visible = false
+	tower_panel.visible = false
+	day_hint_label.visible = false
 
 
 func _on_phase_changed(phase: GameManager.GamePhase) -> void:
 	match phase:
+		GameManager.GamePhase.MENU:
+			phase_label.text = ""
+			tower_panel.visible = false
+			day_hint_label.visible = false
+			dawn_panel.visible = false
+			game_over_panel.visible = false
 		GameManager.GamePhase.DAY:
 			phase_label.text = "[ DAY ]"
 			tower_panel.visible = true
 			day_hint_label.visible = true
 			dawn_panel.visible = false
 			game_over_panel.visible = false
+			_stage_select_panel.visible = false
 		GameManager.GamePhase.NIGHT:
 			phase_label.text = "[ NIGHT ]"
 			tower_panel.visible = false
@@ -111,6 +141,8 @@ func _on_base_damaged(remaining: float) -> void:
 func _on_game_over() -> void:
 	game_over_panel.visible = true
 	result_label.text = "GAME OVER"
+	_retry_button.visible = true
+	_menu_button.visible = true
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -145,3 +177,94 @@ func _setup_tower_buttons() -> void:
 		btn.pressed.connect(func() -> void: tower_selected.emit(tower_res))
 		tower_panel.add_child(btn)
 		_tower_buttons.append(btn)
+
+
+func _setup_stage_select_panel() -> void:
+	_stage_select_panel = Panel.new()
+	_stage_select_panel.set_anchors_preset(Control.PRESET_FULL_RECT)
+	var bg_style := StyleBoxFlat.new()
+	bg_style.bg_color = Color(0.06, 0.04, 0.1, 1.0)
+	_stage_select_panel.add_theme_stylebox_override("panel", bg_style)
+	add_child(_stage_select_panel)
+
+	var vbox := VBoxContainer.new()
+	vbox.set_anchors_preset(Control.PRESET_CENTER)
+	vbox.offset_left = -320.0
+	vbox.offset_top = -120.0
+	vbox.offset_right = 320.0
+	vbox.offset_bottom = 120.0
+	vbox.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	vbox.grow_vertical = Control.GROW_DIRECTION_BOTH
+	vbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	vbox.add_theme_constant_override("separation", 24)
+	_stage_select_panel.add_child(vbox)
+
+	var title := Label.new()
+	title.text = "OPERATION CAT-MOSPHERE"
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	var title_settings := LabelSettings.new()
+	title_settings.font_size = 32
+	title_settings.font_color = Color(1.0, 0.85, 0.3, 1.0)
+	title.label_settings = title_settings
+	vbox.add_child(title)
+
+	var subtitle := Label.new()
+	subtitle.text = "Select Stage"
+	subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	var sub_settings := LabelSettings.new()
+	sub_settings.font_size = 18
+	sub_settings.font_color = Color(0.8, 0.8, 0.8, 1.0)
+	subtitle.label_settings = sub_settings
+	vbox.add_child(subtitle)
+
+	var hbox := HBoxContainer.new()
+	hbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	hbox.add_theme_constant_override("separation", 12)
+	vbox.add_child(hbox)
+
+	for i in GameManager.TOTAL_STAGES:
+		var btn := Button.new()
+		btn.text = "Stage %d\n%s" % [i + 1, STAGE_NAMES[i]]
+		btn.custom_minimum_size = Vector2(110, 60)
+		btn.add_theme_font_size_override("font_size", 14)
+		var idx: int = i
+		btn.pressed.connect(func() -> void:
+			_stage_select_panel.visible = false
+			stage_chosen.emit(idx)
+		)
+		hbox.add_child(btn)
+		_stage_buttons.append(btn)
+
+	_stage_select_panel.visible = false
+
+
+func _setup_gameover_buttons() -> void:
+	game_over_panel.offset_left = -160.0
+	game_over_panel.offset_top = -80.0
+	game_over_panel.offset_right = 160.0
+	game_over_panel.offset_bottom = 80.0
+
+	result_label.anchor_bottom = 0.55
+
+	var hbox := HBoxContainer.new()
+	hbox.layout_mode = 1
+	hbox.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
+	hbox.offset_top = -48.0
+	hbox.offset_left = 10.0
+	hbox.offset_right = -10.0
+	hbox.offset_bottom = -10.0
+	hbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	hbox.add_theme_constant_override("separation", 12)
+	game_over_panel.add_child(hbox)
+
+	_retry_button = Button.new()
+	_retry_button.text = "Retry"
+	_retry_button.custom_minimum_size = Vector2(110, 36)
+	_retry_button.pressed.connect(func() -> void: retry_requested.emit())
+	hbox.add_child(_retry_button)
+
+	_menu_button = Button.new()
+	_menu_button.text = "Stage Select"
+	_menu_button.custom_minimum_size = Vector2(110, 36)
+	_menu_button.pressed.connect(func() -> void: menu_requested.emit())
+	hbox.add_child(_menu_button)
