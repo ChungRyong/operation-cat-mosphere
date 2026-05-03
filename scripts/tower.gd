@@ -20,6 +20,7 @@ var _collapse_timer: float = 0.0
 
 
 func _ready() -> void:
+	add_to_group("towers")
 	if data == null:
 		return
 	current_health = data.max_health
@@ -130,25 +131,26 @@ func _on_fire_timer_timeout() -> void:
 
 func _find_target() -> Node2D:
 	var enemies: Array = get_tree().get_nodes_in_group("enemies")
+	var closest_distractor: Node2D = null
+	var closest_distractor_dist: float = _effective_range
 	var closest: Node2D = null
 	var closest_dist: float = _effective_range
 
 	for enemy in enemies:
 		if not is_instance_valid(enemy):
 			continue
-		if enemy is PathFollow2D and enemy.data != null and enemy.is_gimmick_distractor():
-			var dist: float = global_position.distance_to(enemy.global_position)
-			if dist <= _effective_range:
-				return enemy
-
-	for enemy in enemies:
-		if not is_instance_valid(enemy):
-			continue
 		var dist: float = global_position.distance_to(enemy.global_position)
-		if dist <= closest_dist:
+		if dist > _effective_range:
+			continue
+		if enemy is PathFollow2D and enemy._distract_active and enemy.is_gimmick_distractor():
+			if dist < closest_distractor_dist:
+				closest_distractor = enemy
+				closest_distractor_dist = dist
+		if dist < closest_dist:
 			closest = enemy
 			closest_dist = dist
-	return closest
+
+	return closest_distractor if closest_distractor != null else closest
 
 
 func _shoot(target: Node2D) -> void:

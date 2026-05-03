@@ -9,8 +9,6 @@ const LASER_POINTER: EnemyData = preload("res://resources/enemies/laser_pointer.
 const MIRROR_CRAFT: EnemyData = preload("res://resources/enemies/mirror_craft.tres")
 const STEEL_CAN_GATE: EnemyData = preload("res://resources/enemies/steel_can_gate.tres")
 
-@export var enemy_scene: PackedScene
-
 var paths: Array[Path2D] = []
 var _spawn_queue: Array = []
 var _spawning: bool = false
@@ -144,13 +142,11 @@ func _spawn_group(entry: Dictionary) -> void:
 
 
 func _spawn_one(enemy_data: EnemyData, path_index: int) -> void:
-	if enemy_scene == null:
-		return
 	var target_path: Path2D = _get_path(path_index)
 	if target_path == null:
 		return
-	var enemy: PathFollow2D = enemy_scene.instantiate()
-	enemy.data = enemy_data
+	var enemy: PathFollow2D = EnemyPool.get_enemy()
+	enemy.init_pooled(enemy_data)
 	target_path.add_child(enemy)
 	enemy.add_to_group("enemies")
 	enemy.died.connect(_on_enemy_died)

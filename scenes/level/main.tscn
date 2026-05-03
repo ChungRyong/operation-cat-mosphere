@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3]
+[gd_scene load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://scripts/main.gd" id="1"]
 [ext_resource type="PackedScene" path="res://scenes/tower/tower.tscn" id="2"]
@@ -6,7 +6,6 @@
 [ext_resource type="PackedScene" path="res://scenes/hero/hero.tscn" id="4"]
 [ext_resource type="PackedScene" path="res://scenes/ui/hud.tscn" id="5"]
 [ext_resource type="Script" path="res://scripts/wave_manager.gd" id="6"]
-[ext_resource type="PackedScene" path="res://scenes/enemy/enemy.tscn" id="7"]
 
 [node name="Main" type="Node2D"]
 script = ExtResource("1")
@@ -29,7 +28,6 @@ position = Vector2(640, 360)
 [node name="WaveManager" type="Node" parent="."]
 unique_name_in_owner = true
 script = ExtResource("6")
-enemy_scene = ExtResource("7")
 
 [node name="HUD" parent="." instance=ExtResource("5")]
 unique_name_in_owner = true

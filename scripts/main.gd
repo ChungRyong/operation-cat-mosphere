@@ -109,8 +109,7 @@ func _clear_pickups() -> void:
 
 
 func _clear_enemies() -> void:
-	for enemy in get_tree().get_nodes_in_group("enemies"):
-		enemy.queue_free()
+	EnemyPool.return_all_active()
 
 
 func _on_wave_finished() -> void:

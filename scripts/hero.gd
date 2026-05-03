@@ -18,6 +18,7 @@ const DISENGAGE_RANGE: float = 70.0
 const AUTO_ATK_INTERVAL: float = 1.0
 const AUTO_ATK_DAMAGE_MULT: float = 0.5
 const MAX_BLOCK_COUNT: int = 3
+const HIT_IFRAME: float = 0.5
 
 var max_hp: float = 100.0
 var current_hp: float = 100.0
@@ -104,6 +105,7 @@ func take_damage(amount: float) -> void:
 	if is_parrying():
 		return
 	current_hp -= amount
+	_invincible_timer = HIT_IFRAME
 	health_changed.emit(current_hp)
 	if current_hp <= 0.0:
 		current_hp = 0.0

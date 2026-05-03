@@ -7,12 +7,18 @@ signal reached_end(damage: float)
 
 const MELEE_DAMAGE: float = 3.0
 const MELEE_INTERVAL: float = 1.5
+const TOWER_ATTACK_RANGE: float = 80.0
+const TOWER_ATTACK_INTERVAL: float = 2.0
+const DISTRACT_RANGE: float = 200.0
 
 var current_health: float = 0.0
 var _stun_timer: float = 0.0
 var _distract_active: bool = false
 var _engaged: bool = false
 var _melee_timer: float = 0.0
+var _tower_target: Node2D = null
+var _tower_atk_timer: float = 0.0
+var _returning: bool = false
 
 
 func _ready() -> void:
@@ -24,19 +30,52 @@ func _ready() -> void:
 	queue_redraw()
 
 
+func init_pooled(enemy_data: EnemyData) -> void:
+	data = enemy_data
+	current_health = enemy_data.max_health
+	_stun_timer = 0.0
+	_distract_active = false
+	_engaged = false
+	_melee_timer = 0.0
+	_tower_target = null
+	_tower_atk_timer = 0.0
+	_returning = false
+	progress = 0.0
+	set_process(true)
+
+
+func _cleanup_for_pool() -> void:
+	_cleanup_engagement()
+	for conn in died.get_connections():
+		died.disconnect(conn["callable"])
+	for conn in reached_end.get_connections():
+		reached_end.disconnect(conn["callable"])
+
+
+func _return_to_pool() -> void:
+	if _returning:
+		return
+	_returning = true
+	EnemyPool.return_enemy(self)
+
+
 func _process(delta: float) -> void:
 	if data == null:
 		return
 	if _stun_timer > 0.0:
 		_stun_timer -= delta
 		return
+	if _update_tower_attack(delta):
+		return
 	if _update_engagement(delta):
 		return
+	if data.enemy_class == EnemyData.EnemyClass.GIMMICK:
+		_update_distract()
 	var effective_speed: float = data.speed * 60.0
 	progress += effective_speed * delta
 	if progress_ratio >= 1.0:
 		reached_end.emit(10.0)
-		queue_free()
+		_return_to_pool()
 
 
 func take_damage(amount: float, attack_type: TowerData.AttackType) -> void:
@@ -62,12 +101,11 @@ func is_gimmick_distractor() -> bool:
 
 
 func _on_die() -> void:
-	_cleanup_engagement()
 	if data.spawn_on_death != null and data.spawn_count > 0:
 		_spawn_children()
 	ResourceManager.add_essence(data.essence_reward)
 	died.emit(self, data.essence_reward)
-	queue_free()
+	_return_to_pool()
 
 
 func _spawn_children() -> void:
@@ -75,15 +113,14 @@ func _spawn_children() -> void:
 	if parent_path == null:
 		return
 	for i in data.spawn_count:
-		var child: PathFollow2D = load("res://scenes/enemy/enemy.tscn").instantiate()
-		child.data = data.spawn_on_death
-		child.progress = progress + randf_range(-20.0, 20.0)
+		var child: PathFollow2D = EnemyPool.get_enemy()
+		child.init_pooled(data.spawn_on_death)
 		parent_path.add_child(child)
+		child.progress = progress + randf_range(-20.0, 20.0)
 		child.add_to_group("enemies")
-		if child.has_signal("died"):
-			child.died.connect(get_tree().current_scene._on_enemy_died)
-		if child.has_signal("reached_end"):
-			child.reached_end.connect(get_tree().current_scene._on_enemy_reached_end)
+		child.died.connect(get_tree().current_scene._on_enemy_died)
+		child.reached_end.connect(get_tree().current_scene._on_enemy_reached_end)
+		child.queue_redraw()
 
 
 func _draw() -> void:
@@ -100,12 +137,59 @@ func _draw() -> void:
 		draw_circle(Vector2.ZERO, data.radius + 2, Color(1.0, 1.0, 0.0, 0.3))
 	if _engaged:
 		draw_arc(Vector2.ZERO, data.radius + 4.0, 0.0, TAU, 16, Color(1.0, 0.3, 0.2, 0.5), 2.0)
+	if data.attacks_towers and _tower_target != null and is_instance_valid(_tower_target):
+		draw_arc(Vector2.ZERO, data.radius + 4.0, 0.0, TAU, 16, Color(0.8, 0.5, 0.1, 0.5), 2.0)
 	var bar_width: float = data.radius * 2.2
 	var bar_height: float = 4.0
 	var bar_pos: Vector2 = Vector2(-bar_width * 0.5, -data.radius - 10.0)
 	draw_rect(Rect2(bar_pos, Vector2(bar_width, bar_height)), Color(0.2, 0.0, 0.0, 1.0))
 	var ratio: float = clamp(current_health / data.max_health, 0.0, 1.0)
 	draw_rect(Rect2(bar_pos, Vector2(bar_width * ratio, bar_height)), Color(0.2, 0.9, 0.2, 1.0))
+
+
+func _update_tower_attack(delta: float) -> bool:
+	if not data.attacks_towers:
+		return false
+	if _tower_target != null and not is_instance_valid(_tower_target):
+		_tower_target = null
+	if _tower_target == null:
+		_tower_target = _find_nearest_tower()
+	if _tower_target == null:
+		return false
+	var dist: float = global_position.distance_to(_tower_target.global_position)
+	if dist > TOWER_ATTACK_RANGE:
+		_tower_target = null
+		return false
+	_tower_atk_timer -= delta
+	if _tower_atk_timer <= 0.0:
+		_tower_atk_timer = TOWER_ATTACK_INTERVAL
+		_tower_target.take_damage(data.tower_damage)
+	return true
+
+
+func _find_nearest_tower() -> Node2D:
+	var towers: Array = get_tree().get_nodes_in_group("towers")
+	var nearest: Node2D = null
+	var nearest_dist: float = TOWER_ATTACK_RANGE
+	for tower in towers:
+		if not is_instance_valid(tower):
+			continue
+		var dist: float = global_position.distance_to(tower.global_position)
+		if dist < nearest_dist:
+			nearest = tower
+			nearest_dist = dist
+	return nearest
+
+
+func _update_distract() -> void:
+	var towers: Array = get_tree().get_nodes_in_group("towers")
+	_distract_active = false
+	for tower in towers:
+		if not is_instance_valid(tower):
+			continue
+		if global_position.distance_to(tower.global_position) <= DISTRACT_RANGE:
+			_distract_active = true
+			return
 
 
 func _update_engagement(delta: float) -> bool:

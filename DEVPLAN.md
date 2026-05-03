@@ -39,10 +39,10 @@
 
 **Goal:** All enemy mechanics working, performance optimized
 
-- [ ] Steel Can Gate: attack nearest tower foundation (ATK x2 = 50 fixed damage)
-- [ ] Laser Pointer: force aggro on all towers in range (strengthen priority targeting)
-- [ ] Enemy Object Pooling (handle 100+ Swarm units)
-- [ ] Hero i-frame on hit
+- [x] Steel Can Gate: attack nearest tower foundation (ATK x2 = 50 fixed damage)
+- [x] Laser Pointer: force aggro on all towers in range (strengthen priority targeting)
+- [x] Enemy Object Pooling (handle 100+ Swarm units)
+- [x] Hero i-frame on hit
 
 ## Phase 3 - Tower Interaction UI
 
