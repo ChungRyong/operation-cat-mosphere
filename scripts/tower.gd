@@ -83,10 +83,7 @@ func add_floor(floor_data: TowerData) -> bool:
 
 
 func get_add_floor_cost(floor_data: TowerData) -> int:
-	var next_level: int = floors.size() + 1
-	if next_level == 5:
-		return floor_data.build_cost * 2
-	return floor_data.build_cost * next_level
+	return floor_data.build_cost
 
 
 func repair() -> bool:

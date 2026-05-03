@@ -37,9 +37,5 @@ func get_crit_chance(floor_level: int) -> float:
 	return CRIT_BASE + (floor_level - 1) * CRIT_PER_FLOOR
 
 
-func get_floor_cost(floor_level: int) -> int:
-	if floor_level == 1:
-		return build_cost
-	if floor_level == 5:
-		return build_cost * 2
-	return build_cost * floor_level
+func get_floor_cost(_floor_level: int) -> int:
+	return build_cost
