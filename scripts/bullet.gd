@@ -20,7 +20,7 @@ func launch(target: Node2D, damage: float, speed: float, attack_type: TowerData.
 
 
 func _process(delta: float) -> void:
-	if not is_instance_valid(_target):
+	if not is_instance_valid(_target) or not _target.is_inside_tree():
 		queue_free()
 		return
 	var dir: Vector2 = global_position.direction_to(_target.global_position)
@@ -30,7 +30,7 @@ func _process(delta: float) -> void:
 
 
 func _hit_target() -> void:
-	if not is_instance_valid(_target):
+	if not is_instance_valid(_target) or not _target.is_inside_tree():
 		queue_free()
 		return
 
