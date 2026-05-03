@@ -72,6 +72,12 @@ func update_hero_hp(hp: float) -> void:
 	hero_hp_label.text = "HERO: %d" % int(hp)
 
 
+func set_build_mode(enabled: bool) -> void:
+	tower_panel.visible = enabled
+	_tower_info_panel.visible = _tower_info_panel.visible and enabled
+	day_hint_label.text = "[B] Build Mode ON" if enabled else "[B] Build Mode"
+
+
 func show_dawn_cards(cards: Array[Dictionary]) -> void:
 	for child in dawn_cards.get_children():
 		child.queue_free()
@@ -113,7 +119,7 @@ func _on_phase_changed(phase: GameManager.GamePhase) -> void:
 			game_over_panel.visible = false
 		GameManager.GamePhase.DAY:
 			phase_label.text = "[ DAY ]"
-			tower_panel.visible = true
+			tower_panel.visible = false
 			day_hint_label.visible = true
 			dawn_panel.visible = false
 			game_over_panel.visible = false

@@ -18,6 +18,7 @@ var _ghost_pos: Vector2 = Vector2.ZERO
 var _current_map_data: MapData = null
 var _available_slots: Array[Vector2] = []
 var _selected_tower: Node2D = null
+var _build_mode: bool = false
 
 
 func _ready() -> void:
@@ -64,13 +65,12 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
 		if _placing_tower != null:
 			_try_place_tower(event.position)
-		elif GameManager.current_phase == GameManager.GamePhase.DAY:
+		elif _build_mode and GameManager.current_phase == GameManager.GamePhase.DAY:
 			var clicked: Node2D = _find_tower_at(event.position)
 			if clicked != null:
 				_select_tower(clicked)
 			else:
 				_deselect_tower()
-				hero.move_to(event.position)
 		else:
 			hero.move_to(event.position)
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_RIGHT:
@@ -79,14 +79,28 @@ func _unhandled_input(event: InputEvent) -> void:
 			queue_redraw()
 		elif _selected_tower != null:
 			_deselect_tower()
+	if event.is_action_pressed("build_mode"):
+		if GameManager.current_phase == GameManager.GamePhase.DAY:
+			_toggle_build_mode()
 	if event.is_action_pressed("next_wave"):
 		if GameManager.current_phase == GameManager.GamePhase.DAY:
 			_transition_to_night()
 
 
+func _toggle_build_mode() -> void:
+	_build_mode = not _build_mode
+	if not _build_mode:
+		_placing_tower = null
+		_deselect_tower()
+	hud.set_build_mode(_build_mode)
+	queue_redraw()
+
+
 func _transition_to_night() -> void:
+	_build_mode = false
 	_placing_tower = null
 	_deselect_tower()
+	hud.set_build_mode(false)
 	GameManager.start_night()
 	wave_manager.start()
 	queue_redraw()
@@ -149,6 +163,7 @@ func _on_menu() -> void:
 
 
 func _reset_gameplay() -> void:
+	_build_mode = false
 	_placing_tower = null
 	_deselect_tower()
 	_clear_enemies()
@@ -218,6 +233,8 @@ func _on_tower_selected(tower_data: TowerData) -> void:
 	if GameManager.is_game_over:
 		return
 	if GameManager.current_phase != GameManager.GamePhase.DAY:
+		return
+	if not _build_mode:
 		return
 	_deselect_tower()
 	_placing_tower = tower_data
@@ -330,7 +347,7 @@ func _draw_paths() -> void:
 
 
 func _draw_slots() -> void:
-	if GameManager.current_phase != GameManager.GamePhase.DAY:
+	if not _build_mode or GameManager.current_phase != GameManager.GamePhase.DAY:
 		return
 	for slot in _available_slots:
 		var occupied: bool = _is_slot_occupied(slot)

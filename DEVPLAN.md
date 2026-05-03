@@ -52,7 +52,7 @@
 - [x] Add floor button (cost display, max 5)
 - [x] Repair button (repair_cost deduction)
 - [x] Sell button (50% refund)
-- [ ] Build Mode toggle (B key wired up)
+- [x] Build Mode toggle (B key wired up)
 
 ## Phase 4 - Growth Systems
 
