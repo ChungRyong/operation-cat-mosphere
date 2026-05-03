@@ -52,6 +52,8 @@ func _on_day_started(day: int) -> void:
 	hud.update_hero_hp(hero.current_hp)
 	if day == 1:
 		hero.global_position = Vector2(640, 360)
+	_build_mode = true
+	hud.set_build_mode(true)
 	queue_redraw()
 
 

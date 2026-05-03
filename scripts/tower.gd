@@ -17,6 +17,7 @@ var _floor_ranges: Array[float] = []
 var _floor_crits: Array[float] = []
 var _collapsing: bool = false
 var _collapse_timer: float = 0.0
+var _damage_flash: float = 0.0
 
 
 func _ready() -> void:
@@ -38,6 +39,9 @@ func _process(delta: float) -> void:
 	for i in _floor_stun_cds.size():
 		if _floor_stun_cds[i] > 0.0:
 			_floor_stun_cds[i] -= delta
+	if _damage_flash > 0.0:
+		_damage_flash -= delta
+		queue_redraw()
 
 	if _collapsing:
 		_collapse_timer -= delta
@@ -99,6 +103,7 @@ func repair() -> bool:
 
 func take_damage(amount: float) -> void:
 	current_health -= amount
+	_damage_flash = 0.2
 	queue_redraw()
 	if current_health <= 0.0:
 		destroyed.emit()
@@ -216,6 +221,8 @@ func _draw() -> void:
 		var floor_color: Color = floors[i].color
 		if i == floors.size() - 1 and floors.size() == 5:
 			floor_color = floor_color.lightened(0.3)
+		if _damage_flash > 0.0:
+			floor_color = floor_color.lerp(Color(1.0, 0.2, 0.1), _damage_flash / 0.2)
 		draw_rect(Rect2(-half, y_offset - 12.0, half * 2.0, 12.0), floor_color)
 		draw_rect(Rect2(-half, y_offset - 12.0, half * 2.0, 12.0), Color(0.0, 0.0, 0.0, 0.5), false, 1.0)
 

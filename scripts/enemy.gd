@@ -18,6 +18,7 @@ var _engaged: bool = false
 var _melee_timer: float = 0.0
 var _tower_target: Node2D = null
 var _tower_atk_timer: float = 0.0
+var _tower_attack_flash: float = 0.0
 var _returning: bool = false
 
 
@@ -39,6 +40,7 @@ func init_pooled(enemy_data: EnemyData) -> void:
 	_melee_timer = 0.0
 	_tower_target = null
 	_tower_atk_timer = 0.0
+	_tower_attack_flash = 0.0
 	_returning = false
 	progress = 0.0
 	set_process(true)
@@ -139,6 +141,11 @@ func _draw() -> void:
 		draw_arc(Vector2.ZERO, data.radius + 4.0, 0.0, TAU, 16, Color(1.0, 0.3, 0.2, 0.5), 2.0)
 	if data.attacks_towers and _tower_target != null and is_instance_valid(_tower_target):
 		draw_arc(Vector2.ZERO, data.radius + 4.0, 0.0, TAU, 16, Color(0.8, 0.5, 0.1, 0.5), 2.0)
+		if _tower_attack_flash > 0.0:
+			var to_tower: Vector2 = _tower_target.global_position - global_position
+			var flash_alpha: float = _tower_attack_flash / 0.25
+			draw_line(Vector2.ZERO, to_tower, Color(1.0, 0.4, 0.1, flash_alpha * 0.8), 2.0)
+			draw_circle(to_tower, 8.0 * flash_alpha, Color(1.0, 0.6, 0.2, flash_alpha * 0.5))
 	var bar_width: float = data.radius * 2.2
 	var bar_height: float = 4.0
 	var bar_pos: Vector2 = Vector2(-bar_width * 0.5, -data.radius - 10.0)
@@ -160,10 +167,15 @@ func _update_tower_attack(delta: float) -> bool:
 	if dist > TOWER_ATTACK_RANGE:
 		_tower_target = null
 		return false
+	if _tower_attack_flash > 0.0:
+		_tower_attack_flash -= delta
+		queue_redraw()
 	_tower_atk_timer -= delta
 	if _tower_atk_timer <= 0.0:
 		_tower_atk_timer = TOWER_ATTACK_INTERVAL
+		_tower_attack_flash = 0.25
 		_tower_target.take_damage(data.tower_damage)
+		queue_redraw()
 	return true
 
 

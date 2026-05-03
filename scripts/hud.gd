@@ -119,8 +119,9 @@ func _on_phase_changed(phase: GameManager.GamePhase) -> void:
 			game_over_panel.visible = false
 		GameManager.GamePhase.DAY:
 			phase_label.text = "[ DAY ]"
-			tower_panel.visible = false
+			tower_panel.visible = true
 			day_hint_label.visible = true
+			day_hint_label.text = "[B] Build Mode ON"
 			dawn_panel.visible = false
 			game_over_panel.visible = false
 			_map_select_panel.visible = false
