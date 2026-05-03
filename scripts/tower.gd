@@ -73,7 +73,7 @@ func add_floor(floor_data: TowerData) -> bool:
 	if not ResourceManager.spend_scrap(cost):
 		return false
 	floors.append(floor_data)
-	_floor_timers.append(0.0)
+	_floor_timers.append(randf_range(0.1, 0.3))
 	_floor_stun_cds.append(0.0)
 	total_invested += cost
 	floor_level = floors.size()
@@ -202,7 +202,7 @@ func _shoot(floor_index: int, target: Node2D) -> void:
 
 	var bullet: Node2D = bullet_scene.instantiate()
 	get_tree().current_scene.add_child(bullet)
-	bullet.global_position = global_position
+	bullet.global_position = global_position + Vector2(0, -floor_index * 12.0)
 	bullet.launch(target, _get_buffed_damage(fd), fd.projectile_speed, fd.attack_type, is_crit, stun_val, self)
 
 	if can_stun:
