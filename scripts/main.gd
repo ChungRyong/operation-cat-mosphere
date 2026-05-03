@@ -54,6 +54,8 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
 		if _placing_tower != null:
 			_try_place_tower(event.position)
+		else:
+			hero.move_to(event.position)
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_RIGHT:
 		if _placing_tower != null:
 			_placing_tower = null

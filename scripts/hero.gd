@@ -13,6 +13,11 @@ const PARRY_REFLECT_MULT: float = 1.5
 const PARRY_COOLDOWN: float = 3.0
 const ULTIMATE_DAMAGE: float = 100.0
 const ULTIMATE_INVINCIBLE: float = 5.0
+const BLOCK_RANGE: float = 50.0
+const DISENGAGE_RANGE: float = 70.0
+const AUTO_ATK_INTERVAL: float = 1.0
+const AUTO_ATK_DAMAGE_MULT: float = 0.5
+const MAX_BLOCK_COUNT: int = 3
 
 var max_hp: float = 100.0
 var current_hp: float = 100.0
@@ -23,19 +28,29 @@ var _punch_cd: float = 0.0
 var _parry_cd: float = 0.0
 var _parry_active: float = 0.0
 var _invincible_timer: float = 0.0
+var _auto_atk_timer: float = 0.0
+var _blocked_count: int = 0
+var _move_target: Vector2 = Vector2.ZERO
+var _moving: bool = false
+const ARRIVAL_DISTANCE: float = 5.0
 
 
 func _ready() -> void:
 	current_hp = max_hp
 	add_to_group("hero")
+	GameManager.phase_changed.connect(_on_phase_changed)
 
 
 func _physics_process(delta: float) -> void:
-	var input_dir := Vector2(
-		Input.get_axis("move_left", "move_right"),
-		Input.get_axis("move_up", "move_down")
-	)
-	velocity = input_dir.normalized() * _get_move_speed()
+	if _moving and current_hp > 0.0:
+		var diff: Vector2 = _move_target - global_position
+		if diff.length() <= ARRIVAL_DISTANCE:
+			_moving = false
+			velocity = Vector2.ZERO
+		else:
+			velocity = diff.normalized() * _get_move_speed()
+	else:
+		velocity = Vector2.ZERO
 	move_and_slide()
 
 	_attack_timer -= delta
@@ -52,6 +67,12 @@ func _physics_process(delta: float) -> void:
 		_start_parry()
 	if Input.is_action_just_pressed("ultimate") and ultimate_available:
 		_use_ultimate()
+
+	if GameManager.current_phase == GameManager.GamePhase.NIGHT and current_hp > 0.0:
+		_auto_atk_timer -= delta
+		if _auto_atk_timer <= 0.0:
+			if _auto_attack():
+				_auto_atk_timer = AUTO_ATK_INTERVAL
 
 	queue_redraw()
 
@@ -109,6 +130,9 @@ func _draw() -> void:
 	if _parry_active > 0.0:
 		draw_arc(Vector2.ZERO, 28.0, 0.0, TAU, 24, Color(0.3, 0.8, 1.0, 0.6), 3.0)
 
+	if _blocked_count > 0:
+		draw_arc(Vector2.ZERO, BLOCK_RANGE, 0.0, TAU, 24, Color(1.0, 0.4, 0.2, 0.3), 2.0)
+
 	var bar_w: float = 40.0
 	var bar_pos := Vector2(-bar_w * 0.5, -34.0)
 	draw_rect(Rect2(bar_pos, Vector2(bar_w, 4.0)), Color(0.3, 0.0, 0.0, 1.0))
@@ -130,3 +154,47 @@ func _get_move_speed() -> float:
 		if buff["type"] == "hero_spd":
 			spd *= (1.0 + buff["value"])
 	return spd
+
+
+func _auto_attack() -> bool:
+	var enemies: Array = get_tree().get_nodes_in_group("enemies")
+	var nearest: Node = null
+	var nearest_dist: float = BLOCK_RANGE + 10.0
+	for enemy in enemies:
+		if not is_instance_valid(enemy):
+			continue
+		var dist: float = global_position.distance_to(enemy.global_position)
+		if dist < nearest_dist:
+			nearest_dist = dist
+			nearest = enemy
+	if nearest != null and nearest.has_method("take_damage"):
+		var damage: float = _get_atk() * AUTO_ATK_DAMAGE_MULT
+		nearest.take_damage(damage, TowerData.AttackType.LOW_TECH)
+		return true
+	return false
+
+
+func move_to(target: Vector2) -> void:
+	_move_target = target
+	_moving = true
+
+
+func can_block() -> bool:
+	return current_hp > 0.0 and _blocked_count < MAX_BLOCK_COUNT
+
+
+func add_blocked() -> void:
+	_blocked_count += 1
+
+
+func remove_blocked() -> void:
+	_blocked_count = max(_blocked_count - 1, 0)
+
+
+func reset_blocked() -> void:
+	_blocked_count = 0
+
+
+func _on_phase_changed(_phase: GameManager.GamePhase) -> void:
+	if _phase != GameManager.GamePhase.NIGHT:
+		reset_blocked()
