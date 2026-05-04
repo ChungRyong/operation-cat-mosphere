@@ -114,7 +114,13 @@ func _clear_enemies() -> void:
 
 func _on_wave_finished() -> void:
 	GameManager.complete_night()
+	if GameManager.current_day >= GameManager.DAYS_PER_MAP:
+		GameManager.advance_to_next_day()
+		return
 	var cards: Array[Dictionary] = BuffLibrary.pick_random_cards(3)
+	if cards.is_empty():
+		GameManager.advance_to_next_day()
+		return
 	hud.show_dawn_cards(cards)
 
 

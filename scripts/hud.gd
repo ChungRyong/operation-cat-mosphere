@@ -83,7 +83,9 @@ func show_dawn_cards(cards: Array[Dictionary]) -> void:
 		child.queue_free()
 	for card in cards:
 		var btn := Button.new()
-		btn.text = "%s\n%s" % [card["name"], card["desc"]]
+		var stacks: int = BuffLibrary._get_buff_count(card["id"])
+		var max_s: int = card["max_stacks"]
+		btn.text = "%s (%d/%d)\n%s" % [card["name"], stacks, max_s, card["desc"]]
 		btn.custom_minimum_size = Vector2(180, 100)
 		btn.add_theme_font_size_override("font_size", 14)
 		var c: Dictionary = card
