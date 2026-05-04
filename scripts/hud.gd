@@ -11,6 +11,7 @@ signal tower_sell_requested
 signal hero_levelup_requested(stat: String)
 signal lobby_play_requested
 signal lobby_map_select_requested
+signal lobby_upgrade_requested
 
 @onready var scrap_label: Label = %ScrapLabel
 @onready var essence_label: Label = %EssenceLabel
@@ -46,6 +47,11 @@ var _hero_stat_labels: Dictionary = {}
 var _hero_stat_btns: Dictionary = {}
 var _lobby_panel: Panel
 var _lobby_gold_label: Label
+var _upgrade_panel: Panel
+var _upgrade_gold_label: Label
+var _upgrade_items_container: VBoxContainer
+var _upgrade_tab_buttons: Array[Button] = []
+var _current_upgrade_tab: UpgradeManager.Category = UpgradeManager.Category.TOWER
 const SPEED_STEPS: Array[float] = [1.0, 2.0, 4.0]
 var _speed_index: int = 0
 
@@ -65,6 +71,7 @@ func _ready() -> void:
 	_setup_tower_info_panel()
 	_setup_hero_panel()
 	_setup_lobby_panel()
+	_setup_upgrade_panel()
 	_setup_map_select_panel()
 	_setup_gameover_buttons()
 
@@ -235,7 +242,7 @@ func update_tower_info(tower: Node2D) -> void:
 		return
 	_tower_info_name.text = "%s  Floor: %d/5" % [tower.data.tower_name, tower.floor_level]
 	_tower_info_stats.text = "HP: %d/%d   DPS: %.1f   Range: %d" % [
-		int(tower.current_health), int(tower.data.max_health),
+		int(tower.current_health), int(tower.get_effective_max_hp()),
 		tower.get_total_dps(),
 		int(tower.get_max_range())]
 	if tower.floor_level < 5:
@@ -249,7 +256,7 @@ func update_tower_info(tower: Node2D) -> void:
 		for btn in _tower_floor_btns:
 			btn.visible = false
 	_tower_repair_btn.text = "Repair (%d)" % tower.data.repair_cost
-	_tower_repair_btn.disabled = tower.current_health >= tower.data.max_health or not ResourceManager.can_afford_scrap(tower.data.repair_cost)
+	_tower_repair_btn.disabled = tower.current_health >= tower.get_effective_max_hp() or not ResourceManager.can_afford_scrap(tower.data.repair_cost)
 	_tower_sell_btn.text = "Sell (%d)" % tower.get_sell_value()
 
 
@@ -429,7 +436,7 @@ func _setup_lobby_panel() -> void:
 	vbox.add_child(_lobby_gold_label)
 
 	var desc := Label.new()
-	desc.text = "Gold Cans are earned by clearing days and maps.\nSpend them on permanent upgrades (coming soon)."
+	desc.text = "Gold Cans are earned by clearing days and maps.\nSpend them on permanent upgrades!"
 	desc.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	var desc_settings := LabelSettings.new()
 	desc_settings.font_size = 14
@@ -456,6 +463,13 @@ func _setup_lobby_panel() -> void:
 	map_btn.pressed.connect(func() -> void: lobby_map_select_requested.emit())
 	btn_box.add_child(map_btn)
 
+	var upgrade_btn := Button.new()
+	upgrade_btn.text = "Upgrades"
+	upgrade_btn.custom_minimum_size = Vector2(140, 50)
+	upgrade_btn.add_theme_font_size_override("font_size", 18)
+	upgrade_btn.pressed.connect(func() -> void: lobby_upgrade_requested.emit())
+	btn_box.add_child(upgrade_btn)
+
 	_lobby_panel.visible = false
 
 
@@ -468,6 +482,7 @@ func show_lobby() -> void:
 	_map_select_panel.visible = false
 	_hero_panel.visible = false
 	_tower_info_panel.visible = false
+	_upgrade_panel.visible = false
 
 
 func hide_lobby() -> void:
@@ -477,6 +492,170 @@ func hide_lobby() -> void:
 func _on_gold_can_changed(_amount: int) -> void:
 	if _lobby_panel.visible:
 		_lobby_gold_label.text = "Gold Cans: %d" % ResourceManager.gold_can
+	if _upgrade_panel.visible:
+		_upgrade_gold_label.text = "Gold Cans: %d" % ResourceManager.gold_can
+
+
+func show_upgrade_panel() -> void:
+	_upgrade_panel.visible = true
+	_lobby_panel.visible = false
+	_upgrade_gold_label.text = "Gold Cans: %d" % ResourceManager.gold_can
+	_refresh_upgrade_items()
+
+
+func hide_upgrade_panel() -> void:
+	_upgrade_panel.visible = false
+
+
+func _setup_upgrade_panel() -> void:
+	_upgrade_panel = Panel.new()
+	_upgrade_panel.set_anchors_preset(Control.PRESET_FULL_RECT)
+	var bg_style := StyleBoxFlat.new()
+	bg_style.bg_color = Color(0.06, 0.05, 0.12, 1.0)
+	_upgrade_panel.add_theme_stylebox_override("panel", bg_style)
+	add_child(_upgrade_panel)
+
+	var outer := VBoxContainer.new()
+	outer.set_anchors_preset(Control.PRESET_CENTER)
+	outer.offset_left = -350.0
+	outer.offset_top = -240.0
+	outer.offset_right = 350.0
+	outer.offset_bottom = 240.0
+	outer.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	outer.grow_vertical = Control.GROW_DIRECTION_BOTH
+	outer.alignment = BoxContainer.ALIGNMENT_BEGIN
+	outer.add_theme_constant_override("separation", 12)
+	_upgrade_panel.add_child(outer)
+
+	var title := Label.new()
+	title.text = "UPGRADES"
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	var title_settings := LabelSettings.new()
+	title_settings.font_size = 28
+	title_settings.font_color = Color(1.0, 0.85, 0.3, 1.0)
+	title.label_settings = title_settings
+	outer.add_child(title)
+
+	_upgrade_gold_label = Label.new()
+	_upgrade_gold_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	var gold_settings := LabelSettings.new()
+	gold_settings.font_size = 18
+	gold_settings.font_color = Color(1.0, 0.75, 0.2, 1.0)
+	_upgrade_gold_label.label_settings = gold_settings
+	outer.add_child(_upgrade_gold_label)
+
+	var tab_box := HBoxContainer.new()
+	tab_box.alignment = BoxContainer.ALIGNMENT_CENTER
+	tab_box.add_theme_constant_override("separation", 8)
+	outer.add_child(tab_box)
+
+	var tab_names: Array[String] = ["Tower", "Hero", "Economy"]
+	var tab_cats: Array[UpgradeManager.Category] = [
+		UpgradeManager.Category.TOWER,
+		UpgradeManager.Category.HERO,
+		UpgradeManager.Category.ECONOMY,
+	]
+	for i in tab_names.size():
+		var btn := Button.new()
+		btn.text = tab_names[i]
+		btn.custom_minimum_size = Vector2(100, 36)
+		btn.add_theme_font_size_override("font_size", 14)
+		var cat: UpgradeManager.Category = tab_cats[i]
+		btn.pressed.connect(func() -> void: _on_upgrade_tab(cat))
+		tab_box.add_child(btn)
+		_upgrade_tab_buttons.append(btn)
+
+	_upgrade_items_container = VBoxContainer.new()
+	_upgrade_items_container.add_theme_constant_override("separation", 8)
+	outer.add_child(_upgrade_items_container)
+
+	var back_box := HBoxContainer.new()
+	back_box.alignment = BoxContainer.ALIGNMENT_CENTER
+	outer.add_child(back_box)
+
+	var back_btn := Button.new()
+	back_btn.text = "Back to HQ"
+	back_btn.custom_minimum_size = Vector2(140, 40)
+	back_btn.add_theme_font_size_override("font_size", 14)
+	back_btn.pressed.connect(func() -> void:
+		_upgrade_panel.visible = false
+		show_lobby()
+	)
+	back_box.add_child(back_btn)
+
+	_upgrade_panel.visible = false
+
+
+func _on_upgrade_tab(cat: UpgradeManager.Category) -> void:
+	_current_upgrade_tab = cat
+	_refresh_upgrade_items()
+
+
+func _refresh_upgrade_items() -> void:
+	for child in _upgrade_items_container.get_children():
+		child.queue_free()
+
+	var upgrades: Array = UpgradeManager.get_upgrades_for_category(_current_upgrade_tab)
+	for upg in upgrades:
+		var hbox := HBoxContainer.new()
+		hbox.add_theme_constant_override("separation", 12)
+		_upgrade_items_container.add_child(hbox)
+
+		var info := Label.new()
+		var lv: int = UpgradeManager.get_level(upg["id"])
+		var max_lv: int = UpgradeManager.MAX_LEVEL
+		info.text = "%s  (%s)  Lv %d/%d" % [upg["name"], upg["desc"], lv, max_lv]
+		info.custom_minimum_size = Vector2(320, 0)
+		var info_settings := LabelSettings.new()
+		info_settings.font_size = 15
+		info_settings.font_color = Color(0.9, 0.9, 0.9, 1.0)
+		info.label_settings = info_settings
+		hbox.add_child(info)
+
+		var bar := _create_level_bar(lv, max_lv)
+		hbox.add_child(bar)
+
+		var btn := Button.new()
+		btn.custom_minimum_size = Vector2(110, 32)
+		btn.add_theme_font_size_override("font_size", 13)
+		var cost: int = UpgradeManager.get_cost(upg["id"])
+		if cost < 0:
+			btn.text = "MAX"
+			btn.disabled = true
+		else:
+			btn.text = "Buy (%d)" % cost
+			btn.disabled = not ResourceManager.can_afford_gold(cost)
+		var uid: String = upg["id"]
+		btn.pressed.connect(func() -> void: _on_upgrade_buy(uid))
+		hbox.add_child(btn)
+
+	for i in _upgrade_tab_buttons.size():
+		var cat_val: int = [
+			UpgradeManager.Category.TOWER,
+			UpgradeManager.Category.HERO,
+			UpgradeManager.Category.ECONOMY,
+		][i]
+		_upgrade_tab_buttons[i].disabled = (cat_val == _current_upgrade_tab)
+
+
+func _create_level_bar(current: int, max_val: int) -> HBoxContainer:
+	var bar := HBoxContainer.new()
+	bar.add_theme_constant_override("separation", 3)
+	for i in max_val:
+		var block := ColorRect.new()
+		block.custom_minimum_size = Vector2(16, 16)
+		if i < current:
+			block.color = Color(0.3, 1.0, 0.5, 1.0)
+		else:
+			block.color = Color(0.3, 0.3, 0.3, 0.5)
+		bar.add_child(block)
+	return bar
+
+
+func _on_upgrade_buy(id: String) -> void:
+	UpgradeManager.purchase(id)
+	_upgrade_gold_label.text = "Gold Cans: %d" % ResourceManager.gold_can
+	_refresh_upgrade_items()
 
 
 func _setup_map_select_panel() -> void:

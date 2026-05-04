@@ -190,7 +190,7 @@ func level_up_spd() -> bool:
 
 
 func _get_atk() -> float:
-	var atk: float = BASE_ATK + atk_level * ATK_PER_LEVEL
+	var atk: float = BASE_ATK + atk_level * ATK_PER_LEVEL + UpgradeManager.get_bonus("hero_atk")
 	for buff in GameManager.active_buffs:
 		if buff["type"] == "hero_atk":
 			atk *= (1.0 + buff["value"])
@@ -198,7 +198,7 @@ func _get_atk() -> float:
 
 
 func _get_move_speed() -> float:
-	var spd: float = BASE_MOVE_SPEED + spd_level * SPD_PER_LEVEL
+	var spd: float = BASE_MOVE_SPEED + spd_level * SPD_PER_LEVEL + UpgradeManager.get_bonus("hero_spd")
 	for buff in GameManager.active_buffs:
 		if buff["type"] == "hero_spd":
 			spd *= (1.0 + buff["value"])
@@ -248,7 +248,7 @@ func reset_stats() -> void:
 	hp_level = 0
 	atk_level = 0
 	spd_level = 0
-	max_hp = 100.0
+	max_hp = 100.0 + UpgradeManager.get_bonus("hero_hp")
 	current_hp = max_hp
 	ultimate_available = true
 	_attack_timer = 0.0

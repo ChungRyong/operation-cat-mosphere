@@ -24,7 +24,7 @@ func _ready() -> void:
 	add_to_group("towers")
 	if data == null:
 		return
-	current_health = data.max_health
+	current_health = data.max_health * UpgradeManager.get_mult_bonus("tower_hp")
 	total_invested = data.build_cost
 	floors.append(data)
 	_floor_timers.append(0.0)
@@ -53,7 +53,7 @@ func _process(delta: float) -> void:
 			_floor_crits.pop_back()
 			floor_level = floors.size()
 			queue_redraw()
-			if current_health > data.max_health * TowerData.COLLAPSE_THRESHOLD:
+			if current_health > get_effective_max_hp() * TowerData.COLLAPSE_THRESHOLD:
 				_collapsing = false
 			else:
 				_collapse_timer = 2.0
@@ -90,12 +90,17 @@ func get_add_floor_cost(floor_data: TowerData) -> int:
 	return floor_data.build_cost
 
 
+func get_effective_max_hp() -> float:
+	return data.max_health * UpgradeManager.get_mult_bonus("tower_hp")
+
+
 func repair() -> bool:
-	if current_health >= data.max_health:
+	var eff_max: float = get_effective_max_hp()
+	if current_health >= eff_max:
 		return false
 	if not ResourceManager.spend_scrap(data.repair_cost):
 		return false
-	current_health = data.max_health
+	current_health = eff_max
 	_collapsing = false
 	queue_redraw()
 	return true
@@ -109,7 +114,7 @@ func take_damage(amount: float) -> void:
 		destroyed.emit()
 		queue_free()
 		return
-	if not _collapsing and current_health <= data.max_health * TowerData.COLLAPSE_THRESHOLD and floors.size() > 1:
+	if not _collapsing and current_health <= get_effective_max_hp() * TowerData.COLLAPSE_THRESHOLD and floors.size() > 1:
 		_collapsing = true
 		_collapse_timer = 2.0
 
@@ -143,7 +148,7 @@ func _update_floor_stats() -> void:
 	_floor_crits.clear()
 	for i in floors.size():
 		var fd: TowerData = floors[i]
-		var r: float = fd.attack_range * (1.0 + i * TowerData.RANGE_BONUS_PER_FLOOR)
+		var r: float = fd.attack_range * (1.0 + i * TowerData.RANGE_BONUS_PER_FLOOR) * UpgradeManager.get_mult_bonus("tower_range")
 		var c: float = TowerData.CRIT_BASE + i * TowerData.CRIT_PER_FLOOR
 		for buff in GameManager.active_buffs:
 			match buff["type"]:
@@ -154,7 +159,7 @@ func _update_floor_stats() -> void:
 
 
 func _get_buffed_damage(floor_data: TowerData) -> float:
-	var dmg: float = floor_data.damage
+	var dmg: float = floor_data.damage * UpgradeManager.get_mult_bonus("tower_atk")
 	for buff in GameManager.active_buffs:
 		if buff["type"] == "tower_atk":
 			dmg *= (1.0 + buff["value"])
@@ -233,7 +238,7 @@ func _draw() -> void:
 	if is_selected:
 		draw_rect(Rect2(-half - 2, -(floors.size() * 12.0) - 2, (half + 2) * 2.0, floors.size() * 12.0 + 4), Color(1.0, 1.0, 1.0, 0.6), false, 2.0)
 
-	var hp_ratio: float = clamp(current_health / data.max_health, 0.0, 1.0)
+	var hp_ratio: float = clamp(current_health / get_effective_max_hp(), 0.0, 1.0)
 	var bar_w: float = half * 2.0
 	var bar_y: float = 6.0
 	draw_rect(Rect2(-half, bar_y, bar_w, 3.0), Color(0.3, 0.0, 0.0, 1.0))

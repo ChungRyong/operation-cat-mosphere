@@ -31,7 +31,7 @@ var gold_can: int = 0:
 
 
 func reset_for_map(starting_scrap_amount: int) -> void:
-	scrap = starting_scrap_amount
+	scrap = starting_scrap_amount + int(UpgradeManager.get_bonus("econ_scrap"))
 	essence = 0
 
 
@@ -85,4 +85,4 @@ func spend_gold(amount: int) -> bool:
 
 
 func add_wave_clear_bonus() -> void:
-	scrap += WAVE_CLEAR_BONUS
+	scrap += WAVE_CLEAR_BONUS + int(UpgradeManager.get_bonus("econ_wave"))

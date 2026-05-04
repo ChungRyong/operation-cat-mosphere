@@ -33,6 +33,7 @@ func _ready() -> void:
 	hud.hero_levelup_requested.connect(_on_hero_levelup)
 	hud.lobby_play_requested.connect(_on_lobby_play)
 	hud.lobby_map_select_requested.connect(_on_lobby_map_select)
+	hud.lobby_upgrade_requested.connect(_on_lobby_upgrade)
 	wave_manager.wave_finished.connect(_on_wave_finished)
 	GameManager.game_over.connect(_on_game_over)
 	GameManager.map_cleared.connect(_on_map_cleared)
@@ -178,6 +179,10 @@ func _on_lobby_play() -> void:
 func _on_lobby_map_select() -> void:
 	hud.hide_lobby()
 	_show_map_select()
+
+
+func _on_lobby_upgrade() -> void:
+	hud.show_upgrade_panel()
 
 
 func _on_map_chosen(map_index: int) -> void:

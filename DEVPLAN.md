@@ -60,8 +60,8 @@
 
 - [x] Hero level-up: spend Essence -> HP/ATK/SPD increase
 - [ ] Skill Tree basics: 3 paths (Striker/Commander/Master), pick 1 per stage clear
-- [ ] Layer Synergy: adjacent floor combo passive buffs
-- [ ] Catnip field collection + Cat HQ research tree (permanent upgrades)
+- [x] ~Layer Synergy: skipped — existing floor bonuses (range/crit) are sufficient~
+- [x] Permanent upgrades at Cat HQ (merged 4-4 + 8-3: Gold Can currency, Tower/Hero/Economy upgrades)
 
 ## Phase 5 - Visual & Audio
 
@@ -104,7 +104,7 @@
 
 - [x] 골드 캔(Gold Can) 영구 재화: 실패해도 유지, 적 처치/Day 클리어 보상
 - [x] 로비 화면 (Cat HQ): 영구 강화 구매 UI
-- [ ] 영구 업그레이드 트리: 타워 기본 스탯, 히어로 기본 스탯, 자원 수집 효율
+- [x] 영구 업그레이드 트리: merged into Phase 4 (4-4 + 8-3 통합)
 - [ ] 맵 해금 진행: Day 20 클리어 → 다음 맵 해금
 - [x] 맵 선택 월드맵 UI
 
