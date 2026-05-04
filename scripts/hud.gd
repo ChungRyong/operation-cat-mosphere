@@ -83,9 +83,7 @@ func show_dawn_cards(cards: Array[Dictionary]) -> void:
 		child.queue_free()
 	for card in cards:
 		var btn := Button.new()
-		var stacks: int = BuffLibrary._get_buff_count(card["id"])
-		var max_s: int = card["max_stacks"]
-		btn.text = "%s (%d/%d)\n%s" % [card["name"], stacks, max_s, card["desc"]]
+		btn.text = "%s\n%s" % [card["name"], card["desc"]]
 		btn.custom_minimum_size = Vector2(180, 100)
 		btn.add_theme_font_size_override("font_size", 14)
 		var c: Dictionary = card
@@ -232,10 +230,10 @@ func update_tower_info(tower: Node2D) -> void:
 func _setup_tower_info_panel() -> void:
 	_tower_info_panel = Panel.new()
 	_tower_info_panel.set_anchors_preset(Control.PRESET_CENTER_RIGHT)
-	_tower_info_panel.offset_left = -280.0
-	_tower_info_panel.offset_top = -110.0
-	_tower_info_panel.offset_right = -10.0
-	_tower_info_panel.offset_bottom = 110.0
+	_tower_info_panel.offset_left = -310.0
+	_tower_info_panel.offset_top = -120.0
+	_tower_info_panel.offset_right = -20.0
+	_tower_info_panel.offset_bottom = 120.0
 	_tower_info_panel.visible = false
 	add_child(_tower_info_panel)
 

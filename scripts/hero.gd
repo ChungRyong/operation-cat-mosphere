@@ -45,14 +45,17 @@ func _ready() -> void:
 func _physics_process(delta: float) -> void:
 	if _moving and current_hp > 0.0:
 		var diff: Vector2 = _move_target - global_position
-		if diff.length() <= ARRIVAL_DISTANCE:
+		var speed: float = _get_move_speed()
+		var step: float = speed * delta
+		if diff.length() <= max(step, ARRIVAL_DISTANCE):
 			_moving = false
 			velocity = Vector2.ZERO
+			global_position = _move_target
 		else:
-			velocity = diff.normalized() * _get_move_speed()
+			velocity = diff.normalized() * speed
+			move_and_slide()
 	else:
 		velocity = Vector2.ZERO
-	move_and_slide()
 
 	_attack_timer -= delta
 	_punch_cd -= delta
