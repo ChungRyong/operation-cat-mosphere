@@ -30,6 +30,7 @@ func _ready() -> void:
 	hud.tower_add_floor_requested.connect(_on_tower_add_floor)
 	hud.tower_repair_requested.connect(_on_tower_repair)
 	hud.tower_sell_requested.connect(_on_tower_sell)
+	hud.hero_levelup_requested.connect(_on_hero_levelup)
 	wave_manager.wave_finished.connect(_on_wave_finished)
 	GameManager.game_over.connect(_on_game_over)
 	GameManager.map_cleared.connect(_on_map_cleared)
@@ -73,7 +74,10 @@ func _unhandled_input(event: InputEvent) -> void:
 				_select_tower(clicked)
 			else:
 				_deselect_tower()
+		elif GameManager.current_phase == GameManager.GamePhase.DAY and _is_hero_clicked(event.position):
+			_show_hero_panel()
 		else:
+			hud.hide_hero_panel()
 			hero.move_to(event.position)
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_RIGHT:
 		if _placing_tower != null:
@@ -81,6 +85,8 @@ func _unhandled_input(event: InputEvent) -> void:
 			queue_redraw()
 		elif _selected_tower != null:
 			_deselect_tower()
+		else:
+			hud.hide_hero_panel()
 	if event.is_action_pressed("build_mode"):
 		if GameManager.current_phase == GameManager.GamePhase.DAY:
 			_toggle_build_mode()
@@ -235,6 +241,26 @@ func _on_tower_sell() -> void:
 	_selected_tower = null
 	hud.hide_tower_info()
 	queue_redraw()
+
+
+func _is_hero_clicked(pos: Vector2) -> bool:
+	return pos.distance_to(hero.global_position) < 30.0
+
+
+func _show_hero_panel() -> void:
+	_deselect_tower()
+	hud.show_hero_panel(hero)
+
+
+func _on_hero_levelup(stat: String) -> void:
+	var success: bool = false
+	match stat:
+		"hp": success = hero.level_up_hp()
+		"atk": success = hero.level_up_atk()
+		"spd": success = hero.level_up_spd()
+	if success:
+		hud.update_hero_panel(hero)
+		hud.update_hero_hp(hero.current_hp)
 
 
 func _on_tower_selected(tower_data: TowerData) -> void:

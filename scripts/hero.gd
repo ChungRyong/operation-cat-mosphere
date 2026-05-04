@@ -20,9 +20,19 @@ const AUTO_ATK_DAMAGE_MULT: float = 0.5
 const MAX_BLOCK_COUNT: int = 3
 const HIT_IFRAME: float = 0.5
 
+const MAX_STAT_LEVEL: int = 5
+const LEVEL_COST_BASE: int = 10
+const LEVEL_COST_SCALE: int = 5
+const HP_PER_LEVEL: float = 20.0
+const ATK_PER_LEVEL: float = 3.0
+const SPD_PER_LEVEL: float = 30.0
+
 var max_hp: float = 100.0
 var current_hp: float = 100.0
 var ultimate_available: bool = true
+var hp_level: int = 0
+var atk_level: int = 0
+var spd_level: int = 0
 
 var _attack_timer: float = 0.0
 var _punch_cd: float = 0.0
@@ -145,8 +155,42 @@ func _draw() -> void:
 	draw_rect(Rect2(bar_pos, Vector2(bar_w * hp_ratio, 4.0)), Color(0.9, 0.2, 0.2, 1.0))
 
 
+func get_level_cost(current_level: int) -> int:
+	return LEVEL_COST_BASE + current_level * LEVEL_COST_SCALE
+
+
+func level_up_hp() -> bool:
+	if hp_level >= MAX_STAT_LEVEL:
+		return false
+	if not ResourceManager.spend_essence(get_level_cost(hp_level)):
+		return false
+	hp_level += 1
+	max_hp = 100.0 + hp_level * HP_PER_LEVEL
+	current_hp = max_hp
+	health_changed.emit(current_hp)
+	return true
+
+
+func level_up_atk() -> bool:
+	if atk_level >= MAX_STAT_LEVEL:
+		return false
+	if not ResourceManager.spend_essence(get_level_cost(atk_level)):
+		return false
+	atk_level += 1
+	return true
+
+
+func level_up_spd() -> bool:
+	if spd_level >= MAX_STAT_LEVEL:
+		return false
+	if not ResourceManager.spend_essence(get_level_cost(spd_level)):
+		return false
+	spd_level += 1
+	return true
+
+
 func _get_atk() -> float:
-	var atk: float = BASE_ATK
+	var atk: float = BASE_ATK + atk_level * ATK_PER_LEVEL
 	for buff in GameManager.active_buffs:
 		if buff["type"] == "hero_atk":
 			atk *= (1.0 + buff["value"])
@@ -154,7 +198,7 @@ func _get_atk() -> float:
 
 
 func _get_move_speed() -> float:
-	var spd: float = BASE_MOVE_SPEED
+	var spd: float = BASE_MOVE_SPEED + spd_level * SPD_PER_LEVEL
 	for buff in GameManager.active_buffs:
 		if buff["type"] == "hero_spd":
 			spd *= (1.0 + buff["value"])
@@ -201,6 +245,9 @@ func reset_blocked() -> void:
 
 
 func reset_stats() -> void:
+	hp_level = 0
+	atk_level = 0
+	spd_level = 0
 	max_hp = 100.0
 	current_hp = max_hp
 	ultimate_available = true

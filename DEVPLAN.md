@@ -58,7 +58,7 @@
 
 **Goal:** Progression across stages
 
-- [ ] Hero level-up: spend Essence -> HP/ATK/SPD increase
+- [x] Hero level-up: spend Essence -> HP/ATK/SPD increase
 - [ ] Skill Tree basics: 3 paths (Striker/Commander/Master), pick 1 per stage clear
 - [ ] Layer Synergy: adjacent floor combo passive buffs
 - [ ] Catnip field collection + Cat HQ research tree (permanent upgrades)

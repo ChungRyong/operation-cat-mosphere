@@ -8,6 +8,7 @@ signal menu_requested
 signal tower_add_floor_requested(floor_data: TowerData)
 signal tower_repair_requested
 signal tower_sell_requested
+signal hero_levelup_requested(stat: String)
 
 @onready var scrap_label: Label = %ScrapLabel
 @onready var essence_label: Label = %EssenceLabel
@@ -36,6 +37,9 @@ var _tower_floor_btns: Array[Button] = []
 var _floor_tower_datas: Array[TowerData] = []
 var _tower_repair_btn: Button
 var _tower_sell_btn: Button
+var _hero_panel: Panel
+var _hero_stat_labels: Dictionary = {}
+var _hero_stat_btns: Dictionary = {}
 const SPEED_STEPS: Array[float] = [1.0, 2.0, 4.0]
 var _speed_index: int = 0
 
@@ -52,6 +56,7 @@ func _ready() -> void:
 	speed_button.pressed.connect(_on_speed_pressed)
 	_setup_tower_buttons()
 	_setup_tower_info_panel()
+	_setup_hero_panel()
 	_setup_map_select_panel()
 	_setup_gameover_buttons()
 
@@ -132,6 +137,7 @@ func _on_phase_changed(phase: GameManager.GamePhase) -> void:
 			tower_panel.visible = false
 			day_hint_label.visible = false
 			_tower_info_panel.visible = false
+			_hero_panel.visible = false
 		GameManager.GamePhase.DAWN:
 			phase_label.text = "[ DAWN ]"
 			tower_panel.visible = false
@@ -296,6 +302,75 @@ func _setup_tower_info_panel() -> void:
 	_tower_sell_btn.add_theme_font_size_override("font_size", 12)
 	_tower_sell_btn.pressed.connect(func() -> void: tower_sell_requested.emit())
 	action_box.add_child(_tower_sell_btn)
+
+
+func _setup_hero_panel() -> void:
+	_hero_panel = Panel.new()
+	_hero_panel.set_anchors_preset(Control.PRESET_CENTER_LEFT)
+	_hero_panel.offset_left = 20.0
+	_hero_panel.offset_top = -90.0
+	_hero_panel.offset_right = 220.0
+	_hero_panel.offset_bottom = 90.0
+	_hero_panel.visible = false
+	add_child(_hero_panel)
+
+	var vbox := VBoxContainer.new()
+	vbox.set_anchors_preset(Control.PRESET_FULL_RECT)
+	vbox.offset_left = 8.0
+	vbox.offset_top = 8.0
+	vbox.offset_right = -8.0
+	vbox.offset_bottom = -8.0
+	vbox.add_theme_constant_override("separation", 4)
+	_hero_panel.add_child(vbox)
+
+	var title := Label.new()
+	title.text = "Hero Level Up"
+	title.add_theme_font_size_override("font_size", 14)
+	vbox.add_child(title)
+
+	for stat in ["hp", "atk", "spd"]:
+		var hbox := HBoxContainer.new()
+		hbox.add_theme_constant_override("separation", 6)
+		vbox.add_child(hbox)
+		var lbl := Label.new()
+		lbl.add_theme_font_size_override("font_size", 12)
+		lbl.custom_minimum_size = Vector2(110, 0)
+		hbox.add_child(lbl)
+		_hero_stat_labels[stat] = lbl
+		var btn := Button.new()
+		btn.custom_minimum_size = Vector2(70, 28)
+		btn.add_theme_font_size_override("font_size", 11)
+		var s: String = stat
+		btn.pressed.connect(func() -> void: hero_levelup_requested.emit(s))
+		hbox.add_child(btn)
+		_hero_stat_btns[stat] = btn
+
+
+func show_hero_panel(hero: CharacterBody2D) -> void:
+	_hero_panel.visible = true
+	update_hero_panel(hero)
+
+
+func hide_hero_panel() -> void:
+	_hero_panel.visible = false
+
+
+func update_hero_panel(hero: CharacterBody2D) -> void:
+	if hero == null:
+		return
+	var max_lv: int = hero.MAX_STAT_LEVEL
+	_hero_stat_labels["hp"].text = "HP: %d  Lv %d/%d" % [int(hero.max_hp), hero.hp_level, max_lv]
+	_hero_stat_labels["atk"].text = "ATK: %.0f  Lv %d/%d" % [hero._get_atk(), hero.atk_level, max_lv]
+	_hero_stat_labels["spd"].text = "SPD: %.0f  Lv %d/%d" % [hero._get_move_speed(), hero.spd_level, max_lv]
+	for stat in ["hp", "atk", "spd"]:
+		var lv: int = hero.get(stat + "_level")
+		if lv >= max_lv:
+			_hero_stat_btns[stat].text = "MAX"
+			_hero_stat_btns[stat].disabled = true
+		else:
+			var cost: int = hero.get_level_cost(lv)
+			_hero_stat_btns[stat].text = "+(%d)" % cost
+			_hero_stat_btns[stat].disabled = not ResourceManager.can_afford_essence(cost)
 
 
 func _setup_map_select_panel() -> void:

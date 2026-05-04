@@ -46,6 +46,17 @@ func add_scrap(amount: int) -> void:
 	scrap += amount
 
 
+func can_afford_essence(cost: int) -> bool:
+	return essence >= cost
+
+
+func spend_essence(amount: int) -> bool:
+	if not can_afford_essence(amount):
+		return false
+	essence -= amount
+	return true
+
+
 func add_essence(amount: int) -> void:
 	essence += amount
 
