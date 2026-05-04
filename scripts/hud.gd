@@ -30,6 +30,8 @@ signal lobby_map_select_requested
 var _tower_buttons: Array[Button] = []
 var _map_select_panel: Panel
 var _map_buttons: Array[Button] = []
+var _map_status_labels: Array[Label] = []
+var _map_back_btn: Button
 var _retry_button: Button
 var _menu_button: Button
 var _tower_info_panel: Panel
@@ -114,7 +116,17 @@ func show_map_clear() -> void:
 
 func show_map_select(highest_unlocked: int) -> void:
 	for i in _map_buttons.size():
-		_map_buttons[i].disabled = i > highest_unlocked
+		var locked: bool = i > highest_unlocked
+		_map_buttons[i].disabled = locked
+		if locked:
+			_map_status_labels[i].text = "LOCKED"
+			_map_status_labels[i].label_settings.font_color = Color(0.5, 0.5, 0.5, 1.0)
+		elif i < highest_unlocked:
+			_map_status_labels[i].text = "CLEAR"
+			_map_status_labels[i].label_settings.font_color = Color(0.3, 1.0, 0.3, 1.0)
+		else:
+			_map_status_labels[i].text = "NEW"
+			_map_status_labels[i].label_settings.font_color = Color(1.0, 0.85, 0.3, 1.0)
 	_map_select_panel.visible = true
 	game_over_panel.visible = false
 	dawn_panel.visible = false
@@ -477,53 +489,89 @@ func _setup_map_select_panel() -> void:
 
 	var vbox := VBoxContainer.new()
 	vbox.set_anchors_preset(Control.PRESET_CENTER)
-	vbox.offset_left = -320.0
-	vbox.offset_top = -120.0
-	vbox.offset_right = 320.0
-	vbox.offset_bottom = 120.0
+	vbox.offset_left = -400.0
+	vbox.offset_top = -200.0
+	vbox.offset_right = 400.0
+	vbox.offset_bottom = 200.0
 	vbox.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	vbox.grow_vertical = Control.GROW_DIRECTION_BOTH
 	vbox.alignment = BoxContainer.ALIGNMENT_CENTER
-	vbox.add_theme_constant_override("separation", 24)
+	vbox.add_theme_constant_override("separation", 20)
 	_map_select_panel.add_child(vbox)
 
 	var title := Label.new()
-	title.text = "OPERATION CAT-MOSPHERE"
+	title.text = "WORLD MAP"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	var title_settings := LabelSettings.new()
-	title_settings.font_size = 32
+	title_settings.font_size = 28
 	title_settings.font_color = Color(1.0, 0.85, 0.3, 1.0)
 	title.label_settings = title_settings
 	vbox.add_child(title)
 
-	var subtitle := Label.new()
-	subtitle.text = "Select Battlefield"
-	subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	var sub_settings := LabelSettings.new()
-	sub_settings.font_size = 18
-	sub_settings.font_color = Color(0.8, 0.8, 0.8, 1.0)
-	subtitle.label_settings = sub_settings
-	vbox.add_child(subtitle)
+	var gold_label := Label.new()
+	gold_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	var gold_settings := LabelSettings.new()
+	gold_settings.font_size = 16
+	gold_settings.font_color = Color(1.0, 0.75, 0.2, 1.0)
+	gold_label.label_settings = gold_settings
+	gold_label.text = "Gold Cans: %d" % ResourceManager.gold_can
+	ResourceManager.gold_can_changed.connect(func(amt: int) -> void:
+		gold_label.text = "Gold Cans: %d" % amt)
+	vbox.add_child(gold_label)
 
-	var hbox := HBoxContainer.new()
-	hbox.alignment = BoxContainer.ALIGNMENT_CENTER
-	hbox.add_theme_constant_override("separation", 12)
-	vbox.add_child(hbox)
+	var grid := GridContainer.new()
+	grid.columns = 4
+	grid.add_theme_constant_override("h_separation", 16)
+	grid.add_theme_constant_override("v_separation", 16)
+	vbox.add_child(grid)
 
-	var map_count: int = MapLibrary.get_map_count()
+	var map_names: Array[String] = [
+		"Living Room", "Backyard", "Basement", "Cat Tower Lab",
+		"Kitchen", "Playground", "Rainy Roof", "Cat Cafe",
+		"Subway", "Convenience Store", "Alien Mothership", "Moon Base",
+	]
+	var map_count: int = maxi(MapLibrary.get_map_count(), map_names.size())
 	for i in map_count:
 		var map_data: MapData = MapLibrary.get_map(i)
+		var map_name: String = map_data.map_name if map_data else map_names[i] if i < map_names.size() else "???"
+
+		var card := VBoxContainer.new()
+		card.add_theme_constant_override("separation", 4)
+		grid.add_child(card)
+
 		var btn := Button.new()
-		btn.text = "Map %d\n%s" % [i + 1, map_data.map_name if map_data else "???"]
-		btn.custom_minimum_size = Vector2(140, 60)
-		btn.add_theme_font_size_override("font_size", 14)
+		btn.text = "Map %d\n%s" % [i + 1, map_name]
+		btn.custom_minimum_size = Vector2(160, 60)
+		btn.add_theme_font_size_override("font_size", 13)
 		var idx: int = i
 		btn.pressed.connect(func() -> void:
 			_map_select_panel.visible = false
 			map_chosen.emit(idx)
 		)
-		hbox.add_child(btn)
+		card.add_child(btn)
 		_map_buttons.append(btn)
+
+		var status := Label.new()
+		status.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		var status_settings := LabelSettings.new()
+		status_settings.font_size = 11
+		status.label_settings = status_settings
+		card.add_child(status)
+		_map_status_labels.append(status)
+
+	var back_box := HBoxContainer.new()
+	back_box.alignment = BoxContainer.ALIGNMENT_CENTER
+	vbox.add_child(back_box)
+
+	_map_back_btn = Button.new()
+	_map_back_btn.text = "Back to HQ"
+	_map_back_btn.custom_minimum_size = Vector2(140, 40)
+	_map_back_btn.add_theme_font_size_override("font_size", 14)
+	_map_back_btn.pressed.connect(func() -> void:
+		_map_select_panel.visible = false
+		menu_requested.emit()
+	)
+	back_box.add_child(_map_back_btn)
 
 	_map_select_panel.visible = false
 
