@@ -64,6 +64,7 @@ func start_night() -> void:
 
 func complete_night() -> void:
 	ResourceManager.add_wave_clear_bonus()
+	ResourceManager.add_gold_can(ResourceManager.GOLD_PER_DAY_CLEAR)
 	day_cleared.emit(current_day)
 	set_phase(GamePhase.DAWN)
 
@@ -71,6 +72,7 @@ func complete_night() -> void:
 func advance_to_next_day() -> void:
 	if current_day >= DAYS_PER_MAP:
 		highest_unlocked_map = maxi(highest_unlocked_map, current_map + 1)
+		ResourceManager.add_gold_can(ResourceManager.GOLD_PER_MAP_CLEAR)
 		map_cleared.emit(current_map)
 		return
 	start_day(current_day + 1)

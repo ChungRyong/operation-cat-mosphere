@@ -31,12 +31,14 @@ func _ready() -> void:
 	hud.tower_repair_requested.connect(_on_tower_repair)
 	hud.tower_sell_requested.connect(_on_tower_sell)
 	hud.hero_levelup_requested.connect(_on_hero_levelup)
+	hud.lobby_play_requested.connect(_on_lobby_play)
+	hud.lobby_map_select_requested.connect(_on_lobby_map_select)
 	wave_manager.wave_finished.connect(_on_wave_finished)
 	GameManager.game_over.connect(_on_game_over)
 	GameManager.map_cleared.connect(_on_map_cleared)
 	GameManager.day_started.connect(_on_day_started)
 	hero.health_changed.connect(func(hp: float) -> void: hud.update_hero_hp(hp))
-	_show_map_select()
+	_show_lobby()
 
 
 func _on_day_started(day: int) -> void:
@@ -156,9 +158,26 @@ func _on_game_over() -> void:
 	wave_manager.stop()
 
 
+func _show_lobby() -> void:
+	GameManager.set_phase(GameManager.GamePhase.MENU)
+	hud.show_lobby()
+
+
 func _show_map_select() -> void:
 	GameManager.set_phase(GameManager.GamePhase.MENU)
+	hud.hide_lobby()
 	hud.show_map_select(GameManager.highest_unlocked_map)
+
+
+func _on_lobby_play() -> void:
+	hud.hide_lobby()
+	_reset_gameplay()
+	GameManager.start_map(GameManager.current_map)
+
+
+func _on_lobby_map_select() -> void:
+	hud.hide_lobby()
+	_show_map_select()
 
 
 func _on_map_chosen(map_index: int) -> void:
@@ -173,7 +192,7 @@ func _on_retry() -> void:
 
 func _on_menu() -> void:
 	_reset_gameplay()
-	_show_map_select()
+	_show_lobby()
 
 
 func _reset_gameplay() -> void:

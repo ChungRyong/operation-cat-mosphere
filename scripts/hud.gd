@@ -9,6 +9,8 @@ signal tower_add_floor_requested(floor_data: TowerData)
 signal tower_repair_requested
 signal tower_sell_requested
 signal hero_levelup_requested(stat: String)
+signal lobby_play_requested
+signal lobby_map_select_requested
 
 @onready var scrap_label: Label = %ScrapLabel
 @onready var essence_label: Label = %EssenceLabel
@@ -40,6 +42,8 @@ var _tower_sell_btn: Button
 var _hero_panel: Panel
 var _hero_stat_labels: Dictionary = {}
 var _hero_stat_btns: Dictionary = {}
+var _lobby_panel: Panel
+var _lobby_gold_label: Label
 const SPEED_STEPS: Array[float] = [1.0, 2.0, 4.0]
 var _speed_index: int = 0
 
@@ -54,9 +58,11 @@ func _ready() -> void:
 	dawn_panel.visible = false
 	day_hint_label.visible = false
 	speed_button.pressed.connect(_on_speed_pressed)
+	ResourceManager.gold_can_changed.connect(_on_gold_can_changed)
 	_setup_tower_buttons()
 	_setup_tower_info_panel()
 	_setup_hero_panel()
+	_setup_lobby_panel()
 	_setup_map_select_panel()
 	_setup_gameover_buttons()
 
@@ -371,6 +377,94 @@ func update_hero_panel(hero: CharacterBody2D) -> void:
 			var cost: int = hero.get_level_cost(lv)
 			_hero_stat_btns[stat].text = "+(%d)" % cost
 			_hero_stat_btns[stat].disabled = not ResourceManager.can_afford_essence(cost)
+
+
+func _setup_lobby_panel() -> void:
+	_lobby_panel = Panel.new()
+	_lobby_panel.set_anchors_preset(Control.PRESET_FULL_RECT)
+	var bg_style := StyleBoxFlat.new()
+	bg_style.bg_color = Color(0.08, 0.06, 0.14, 1.0)
+	_lobby_panel.add_theme_stylebox_override("panel", bg_style)
+	add_child(_lobby_panel)
+
+	var vbox := VBoxContainer.new()
+	vbox.set_anchors_preset(Control.PRESET_CENTER)
+	vbox.offset_left = -300.0
+	vbox.offset_top = -160.0
+	vbox.offset_right = 300.0
+	vbox.offset_bottom = 160.0
+	vbox.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	vbox.grow_vertical = Control.GROW_DIRECTION_BOTH
+	vbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	vbox.add_theme_constant_override("separation", 20)
+	_lobby_panel.add_child(vbox)
+
+	var title := Label.new()
+	title.text = "CAT HQ"
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	var title_settings := LabelSettings.new()
+	title_settings.font_size = 36
+	title_settings.font_color = Color(1.0, 0.85, 0.3, 1.0)
+	title.label_settings = title_settings
+	vbox.add_child(title)
+
+	_lobby_gold_label = Label.new()
+	_lobby_gold_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	var gold_settings := LabelSettings.new()
+	gold_settings.font_size = 20
+	gold_settings.font_color = Color(1.0, 0.75, 0.2, 1.0)
+	_lobby_gold_label.label_settings = gold_settings
+	vbox.add_child(_lobby_gold_label)
+
+	var desc := Label.new()
+	desc.text = "Gold Cans are earned by clearing days and maps.\nSpend them on permanent upgrades (coming soon)."
+	desc.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	var desc_settings := LabelSettings.new()
+	desc_settings.font_size = 14
+	desc_settings.font_color = Color(0.7, 0.7, 0.7, 1.0)
+	desc.label_settings = desc_settings
+	vbox.add_child(desc)
+
+	var btn_box := HBoxContainer.new()
+	btn_box.alignment = BoxContainer.ALIGNMENT_CENTER
+	btn_box.add_theme_constant_override("separation", 16)
+	vbox.add_child(btn_box)
+
+	var play_btn := Button.new()
+	play_btn.text = "Continue"
+	play_btn.custom_minimum_size = Vector2(140, 50)
+	play_btn.add_theme_font_size_override("font_size", 18)
+	play_btn.pressed.connect(func() -> void: lobby_play_requested.emit())
+	btn_box.add_child(play_btn)
+
+	var map_btn := Button.new()
+	map_btn.text = "Map Select"
+	map_btn.custom_minimum_size = Vector2(140, 50)
+	map_btn.add_theme_font_size_override("font_size", 18)
+	map_btn.pressed.connect(func() -> void: lobby_map_select_requested.emit())
+	btn_box.add_child(map_btn)
+
+	_lobby_panel.visible = false
+
+
+func show_lobby() -> void:
+	_lobby_panel.visible = true
+	_lobby_gold_label.text = "Gold Cans: %d" % ResourceManager.gold_can
+	game_over_panel.visible = false
+	dawn_panel.visible = false
+	tower_panel.visible = false
+	_map_select_panel.visible = false
+	_hero_panel.visible = false
+	_tower_info_panel.visible = false
+
+
+func hide_lobby() -> void:
+	_lobby_panel.visible = false
+
+
+func _on_gold_can_changed(_amount: int) -> void:
+	if _lobby_panel.visible:
+		_lobby_gold_label.text = "Gold Cans: %d" % ResourceManager.gold_can
 
 
 func _setup_map_select_panel() -> void:
