@@ -57,6 +57,7 @@ func _build_map_01() -> MapData:
 		16, 16, 16,
 	]
 
+	var BOSS_01: BossData = preload("res://resources/bosses/jelly_king.tres")
 	var J: EnemyData = preload("res://resources/enemies/jelly_slime.tres")
 	var C: EnemyData = preload("res://resources/enemies/jelly_carrier.tres")
 	var L: EnemyData = preload("res://resources/enemies/laser_pointer.tres")
@@ -122,11 +123,12 @@ func _build_map_01() -> MapData:
 		_wg(0, J, 30, 0.8, -1), _wg(30, MR, 8, 2.5, -1),
 		_wg(30, C, 5, 4.0, -1), _wg(60, L, 5, 2.0, -1),
 		_wg(60, S, 5, 3.0, -1)]))
-	# Day 20: Boss-tier wave
-	m.days.append(_day(220, [
-		_wg(0, J, 40, 0.8, -1), _wg(30, MR, 10, 2.0, -1),
-		_wg(30, S, 8, 3.0, -1), _wg(60, C, 8, 3.0, -1),
-		_wg(60, L, 8, 2.0, -1)]))
+	# Day 20: Boss wave
+	var day20 := _day(220, [
+		_wg(0, J, 30, 0.8, -1), _wg(20, MR, 8, 2.0, -1),
+		_wg(20, S, 5, 3.0, -1)])
+	day20.boss = BOSS_01
+	m.days.append(day20)
 
 	return m
 

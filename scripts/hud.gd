@@ -52,7 +52,11 @@ var _upgrade_gold_label: Label
 var _upgrade_items_container: VBoxContainer
 var _upgrade_tab_buttons: Array[Button] = []
 var _current_upgrade_tab: UpgradeManager.Category = UpgradeManager.Category.TOWER
-const SPEED_STEPS: Array[float] = [1.0, 2.0, 4.0]
+var _boss_bar_panel: Panel
+var _boss_bar_fill: ColorRect
+var _boss_bar_bg: ColorRect
+var _boss_name_label: Label
+const SPEED_STEPS: Array[float] = [1.0, 2.0, 4.0, 8.0]
 var _speed_index: int = 0
 
 
@@ -72,6 +76,7 @@ func _ready() -> void:
 	_setup_hero_panel()
 	_setup_lobby_panel()
 	_setup_upgrade_panel()
+	_setup_boss_bar()
 	_setup_map_select_panel()
 	_setup_gameover_buttons()
 
@@ -494,6 +499,73 @@ func _on_gold_can_changed(_amount: int) -> void:
 		_lobby_gold_label.text = "Gold Cans: %d" % ResourceManager.gold_can
 	if _upgrade_panel.visible:
 		_upgrade_gold_label.text = "Gold Cans: %d" % ResourceManager.gold_can
+
+
+func _setup_boss_bar() -> void:
+	_boss_bar_panel = Panel.new()
+	_boss_bar_panel.set_anchors_preset(Control.PRESET_TOP_WIDE)
+	_boss_bar_panel.offset_left = 100.0
+	_boss_bar_panel.offset_top = 8.0
+	_boss_bar_panel.offset_right = -100.0
+	_boss_bar_panel.offset_bottom = 48.0
+	var bg_style := StyleBoxFlat.new()
+	bg_style.bg_color = Color(0.0, 0.0, 0.0, 0.6)
+	bg_style.corner_radius_top_left = 4
+	bg_style.corner_radius_top_right = 4
+	bg_style.corner_radius_bottom_left = 4
+	bg_style.corner_radius_bottom_right = 4
+	_boss_bar_panel.add_theme_stylebox_override("panel", bg_style)
+	add_child(_boss_bar_panel)
+
+	_boss_name_label = Label.new()
+	_boss_name_label.set_anchors_preset(Control.PRESET_TOP_WIDE)
+	_boss_name_label.offset_left = 8.0
+	_boss_name_label.offset_top = 2.0
+	_boss_name_label.offset_right = -8.0
+	_boss_name_label.offset_bottom = 18.0
+	_boss_name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	var name_settings := LabelSettings.new()
+	name_settings.font_size = 12
+	name_settings.font_color = Color(1.0, 0.85, 0.3, 1.0)
+	_boss_name_label.label_settings = name_settings
+	_boss_bar_panel.add_child(_boss_name_label)
+
+	_boss_bar_bg = ColorRect.new()
+	_boss_bar_bg.anchor_left = 0.0
+	_boss_bar_bg.anchor_right = 1.0
+	_boss_bar_bg.offset_left = 8.0
+	_boss_bar_bg.offset_top = 22.0
+	_boss_bar_bg.offset_right = -8.0
+	_boss_bar_bg.offset_bottom = 36.0
+	_boss_bar_bg.color = Color(0.3, 0.0, 0.0, 1.0)
+	_boss_bar_panel.add_child(_boss_bar_bg)
+
+	_boss_bar_fill = ColorRect.new()
+	_boss_bar_fill.anchor_left = 0.0
+	_boss_bar_fill.anchor_right = 0.0
+	_boss_bar_fill.offset_left = 8.0
+	_boss_bar_fill.offset_top = 22.0
+	_boss_bar_fill.offset_right = 8.0
+	_boss_bar_fill.offset_bottom = 36.0
+	_boss_bar_fill.color = Color(0.9, 0.2, 0.1, 1.0)
+	_boss_bar_panel.add_child(_boss_bar_fill)
+
+	_boss_bar_panel.visible = false
+
+
+func show_boss_hp(boss_name: String, ratio: float) -> void:
+	_boss_bar_panel.visible = true
+	_boss_name_label.text = boss_name
+	update_boss_hp(ratio)
+
+
+func update_boss_hp(ratio: float) -> void:
+	var bar_width: float = _boss_bar_panel.size.x - 16.0
+	_boss_bar_fill.offset_right = 8.0 + bar_width * clamp(ratio, 0.0, 1.0)
+
+
+func hide_boss_hp() -> void:
+	_boss_bar_panel.visible = false
 
 
 func show_upgrade_panel() -> void:

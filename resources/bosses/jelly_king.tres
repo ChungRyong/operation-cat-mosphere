@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="BossData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/boss_data.gd" id="1"]
+[ext_resource type="Resource" path="res://resources/enemies/jelly_slime.tres" id="2"]
+
+[resource]
+script = ExtResource("1")
+boss_name = "Jelly King"
+max_health = 2000.0
+defense_type = 0
+phase2_threshold = 0.5
+color = Color(0.9, 0.2, 0.3, 1.0)
+radius = 40.0
+gold_reward = 100
+charge_damage = 30.0
+charge_speed = 400.0
+charge_cooldown = 5.0
+summon_enemy = ExtResource("2")
+summon_count = 8
+summon_cooldown = 10.0
+aoe_damage = 20.0
+aoe_radius = 120.0
+aoe_cooldown = 7.0

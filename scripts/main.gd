@@ -6,6 +6,7 @@ const SLOT_RADIUS: float = 22.0
 
 @export var tower_scene: PackedScene
 @export var bullet_scene: PackedScene
+@export var boss_scene: PackedScene
 
 @onready var hud: CanvasLayer = %HUD
 @onready var wave_manager: Node = %WaveManager
@@ -19,6 +20,7 @@ var _current_map_data: MapData = null
 var _available_slots: Array[Vector2] = []
 var _selected_tower: Node2D = null
 var _build_mode: bool = false
+var _current_boss: Node2D = null
 
 
 func _ready() -> void:
@@ -40,6 +42,12 @@ func _ready() -> void:
 	GameManager.day_started.connect(_on_day_started)
 	hero.health_changed.connect(func(hp: float) -> void: hud.update_hero_hp(hp))
 	_show_lobby()
+
+
+func _process(_delta: float) -> void:
+	if _current_boss != null and is_instance_valid(_current_boss) and _current_boss.data != null:
+		var ratio: float = clamp(_current_boss.current_health / _current_boss.data.max_health, 0.0, 1.0)
+		hud.update_boss_hp(ratio)
 
 
 func _on_day_started(day: int) -> void:
@@ -122,6 +130,17 @@ func _clear_enemies() -> void:
 
 
 func _on_wave_finished() -> void:
+	if _current_map_data != null:
+		var day_data: DayData = _current_map_data.get_day_data(GameManager.current_day)
+		if day_data != null and day_data.boss != null and _current_boss == null:
+			_spawn_boss(day_data.boss)
+			return
+	if _current_boss != null:
+		return
+	_finish_night()
+
+
+func _finish_night() -> void:
 	GameManager.complete_night()
 	if GameManager.current_day >= GameManager.DAYS_PER_MAP:
 		GameManager.advance_to_next_day()
@@ -131,6 +150,31 @@ func _on_wave_finished() -> void:
 		GameManager.advance_to_next_day()
 		return
 	hud.show_dawn_cards(cards)
+
+
+func _spawn_boss(boss_data: BossData) -> void:
+	if boss_scene == null:
+		_finish_night()
+		return
+	var boss: Node2D = boss_scene.instantiate()
+	boss.init_boss(boss_data, Vector2(640, 300))
+	boss.defeated.connect(_on_boss_defeated)
+	add_child(boss)
+	_current_boss = boss
+	hud.show_boss_hp(boss_data.boss_name, 1.0)
+
+
+func _on_boss_defeated(_boss_data: BossData) -> void:
+	_current_boss = null
+	hud.hide_boss_hp()
+	_finish_night()
+
+
+func _cleanup_boss() -> void:
+	if _current_boss != null and is_instance_valid(_current_boss):
+		_current_boss.queue_free()
+	_current_boss = null
+	hud.hide_boss_hp()
 
 
 func _on_dawn_card_picked(buff: Dictionary) -> void:
@@ -157,6 +201,7 @@ func _on_map_cleared(_map_index: int) -> void:
 
 func _on_game_over() -> void:
 	wave_manager.stop()
+	_cleanup_boss()
 
 
 func _show_lobby() -> void:
@@ -205,6 +250,7 @@ func _reset_gameplay() -> void:
 	_placing_tower = null
 	_deselect_tower()
 	_clear_enemies()
+	_cleanup_boss()
 	wave_manager.stop()
 	for tower in tower_container.get_children():
 		tower.queue_free()
