@@ -207,7 +207,9 @@ func _apply_buff(buff: Dictionary) -> void:
 
 
 func _on_map_cleared(_map_index: int) -> void:
-	hud.show_map_clear()
+	var next_map: MapData = MapLibrary.get_map(_map_index + 1)
+	var next_name: String = next_map.map_name if next_map != null else "All Maps Clear!"
+	hud.show_map_clear(ResourceManager.GOLD_PER_MAP_CLEAR, next_name)
 
 
 func _on_game_over() -> void:

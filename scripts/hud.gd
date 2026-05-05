@@ -36,6 +36,8 @@ var _map_status_labels: Array[Label] = []
 var _map_back_btn: Button
 var _retry_button: Button
 var _menu_button: Button
+var _hq_button: Button
+var _result_stats_label: Label
 var _tower_info_panel: Panel
 var _tower_info_name: Label
 var _tower_info_stats: Label
@@ -122,11 +124,16 @@ func show_dawn_cards(cards: Array[Dictionary]) -> void:
 	dawn_panel.visible = true
 
 
-func show_map_clear() -> void:
+func show_map_clear(gold_earned: int, next_map_name: String) -> void:
 	game_over_panel.visible = true
 	result_label.text = "MAP CLEAR!"
+	_result_stats_label.text = "Gold Cans earned: +%d\nNext: %s" % [gold_earned, next_map_name]
+	_result_stats_label.visible = true
 	_retry_button.visible = false
 	_menu_button.visible = true
+	_hq_button.visible = true
+	_debug_clear_btn.visible = false
+	reset_speed()
 
 
 func show_map_select(highest_unlocked: int) -> void:
@@ -199,9 +206,14 @@ func _on_base_damaged(remaining: float) -> void:
 
 func _on_game_over() -> void:
 	game_over_panel.visible = true
-	result_label.text = "GAME OVER — Day %d/%d" % [GameManager.current_day, GameManager.DAYS_PER_MAP]
+	result_label.text = "GAME OVER"
+	_result_stats_label.text = "Survived to Day %d/%d\nGold Cans: %d" % [GameManager.current_day, GameManager.DAYS_PER_MAP, ResourceManager.gold_can]
+	_result_stats_label.visible = true
 	_retry_button.visible = true
 	_menu_button.visible = true
+	_hq_button.visible = true
+	_debug_clear_btn.visible = false
+	reset_speed()
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -847,32 +859,74 @@ func _setup_map_select_panel() -> void:
 
 
 func _setup_gameover_buttons() -> void:
-	game_over_panel.offset_left = -160.0
-	game_over_panel.offset_top = -80.0
-	game_over_panel.offset_right = 160.0
-	game_over_panel.offset_bottom = 80.0
+	game_over_panel.offset_left = -200.0
+	game_over_panel.offset_top = -120.0
+	game_over_panel.offset_right = 200.0
+	game_over_panel.offset_bottom = 120.0
+	var panel_style := StyleBoxFlat.new()
+	panel_style.bg_color = Color(0.06, 0.04, 0.1, 0.95)
+	panel_style.border_color = Color(1.0, 0.85, 0.3, 0.6)
+	panel_style.border_width_top = 2
+	panel_style.border_width_bottom = 2
+	panel_style.border_width_left = 2
+	panel_style.border_width_right = 2
+	panel_style.corner_radius_top_left = 8
+	panel_style.corner_radius_top_right = 8
+	panel_style.corner_radius_bottom_left = 8
+	panel_style.corner_radius_bottom_right = 8
+	game_over_panel.add_theme_stylebox_override("panel", panel_style)
 
-	result_label.anchor_bottom = 0.55
+	var vbox := VBoxContainer.new()
+	vbox.set_anchors_preset(Control.PRESET_FULL_RECT)
+	vbox.offset_left = 16.0
+	vbox.offset_top = 16.0
+	vbox.offset_right = -16.0
+	vbox.offset_bottom = -16.0
+	vbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	vbox.add_theme_constant_override("separation", 10)
+	game_over_panel.add_child(vbox)
+
+	result_label.get_parent().remove_child(result_label)
+	var title_settings := LabelSettings.new()
+	title_settings.font_size = 28
+	title_settings.font_color = Color(1.0, 0.85, 0.3, 1.0)
+	result_label.label_settings = title_settings
+	result_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	vbox.add_child(result_label)
+
+	_result_stats_label = Label.new()
+	_result_stats_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	var stats_settings := LabelSettings.new()
+	stats_settings.font_size = 15
+	stats_settings.font_color = Color(0.8, 0.8, 0.8, 1.0)
+	_result_stats_label.label_settings = stats_settings
+	vbox.add_child(_result_stats_label)
 
 	var hbox := HBoxContainer.new()
-	hbox.layout_mode = 1
-	hbox.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
-	hbox.offset_top = -48.0
-	hbox.offset_left = 10.0
-	hbox.offset_right = -10.0
-	hbox.offset_bottom = -10.0
 	hbox.alignment = BoxContainer.ALIGNMENT_CENTER
 	hbox.add_theme_constant_override("separation", 12)
-	game_over_panel.add_child(hbox)
+	vbox.add_child(hbox)
 
 	_retry_button = Button.new()
 	_retry_button.text = "Retry"
-	_retry_button.custom_minimum_size = Vector2(110, 36)
+	_retry_button.custom_minimum_size = Vector2(100, 36)
+	_retry_button.add_theme_font_size_override("font_size", 14)
 	_retry_button.pressed.connect(func() -> void: retry_requested.emit())
 	hbox.add_child(_retry_button)
 
+	_hq_button = Button.new()
+	_hq_button.text = "Cat HQ"
+	_hq_button.custom_minimum_size = Vector2(100, 36)
+	_hq_button.add_theme_font_size_override("font_size", 14)
+	_hq_button.pressed.connect(func() -> void: menu_requested.emit())
+	hbox.add_child(_hq_button)
+
 	_menu_button = Button.new()
 	_menu_button.text = "Map Select"
-	_menu_button.custom_minimum_size = Vector2(110, 36)
-	_menu_button.pressed.connect(func() -> void: menu_requested.emit())
+	_menu_button.custom_minimum_size = Vector2(100, 36)
+	_menu_button.add_theme_font_size_override("font_size", 14)
+	_menu_button.pressed.connect(func() -> void:
+		game_over_panel.visible = false
+		show_map_select(GameManager.highest_unlocked_map)
+	)
 	hbox.add_child(_menu_button)

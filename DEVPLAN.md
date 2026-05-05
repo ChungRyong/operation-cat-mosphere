@@ -82,7 +82,7 @@
 - [ ] Per-stage difficulty curve tuning
 - [ ] UI theme & font application
 - [ ] Tutorial guide (Stage 1)
-- [ ] Game over / restart flow polish
+- [x] Game over / restart flow polish (stats display, styled panel, Cat HQ button, speed reset)
 
 ---
 
