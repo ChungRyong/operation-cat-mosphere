@@ -75,6 +75,7 @@ func purchase(id: String) -> bool:
 		return false
 	_levels[id] += 1
 	_save()
+	GameManager.save_progress()
 	upgrade_changed.emit()
 	return true
 

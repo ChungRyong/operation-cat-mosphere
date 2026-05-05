@@ -36,6 +36,7 @@ func _ready() -> void:
 	hud.lobby_play_requested.connect(_on_lobby_play)
 	hud.lobby_map_select_requested.connect(_on_lobby_map_select)
 	hud.lobby_upgrade_requested.connect(_on_lobby_upgrade)
+	hud.debug_clear_wave_requested.connect(_on_debug_clear_wave)
 	wave_manager.wave_finished.connect(_on_wave_finished)
 	GameManager.game_over.connect(_on_game_over)
 	GameManager.map_cleared.connect(_on_map_cleared)
@@ -168,6 +169,16 @@ func _on_boss_defeated(_boss_data: BossData) -> void:
 	_current_boss = null
 	hud.hide_boss_hp()
 	_finish_night()
+
+
+func _on_debug_clear_wave() -> void:
+	_clear_enemies()
+	if _current_boss != null and is_instance_valid(_current_boss):
+		_current_boss.current_health = 0.0
+		_current_boss._on_defeated()
+	else:
+		wave_manager.stop()
+		_on_wave_finished()
 
 
 func _cleanup_boss() -> void:

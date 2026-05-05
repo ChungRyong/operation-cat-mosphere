@@ -105,7 +105,7 @@
 - [x] 골드 캔(Gold Can) 영구 재화: 실패해도 유지, 적 처치/Day 클리어 보상
 - [x] 로비 화면 (Cat HQ): 영구 강화 구매 UI
 - [x] 영구 업그레이드 트리: merged into Phase 4 (4-4 + 8-3 통합)
-- [ ] 맵 해금 진행: Day 20 클리어 → 다음 맵 해금
+- [x] 맵 해금 진행: Day 20 클리어 → 다음 맵 해금 + progress/gold_can 영속 저장
 - [x] 맵 선택 월드맵 UI
 
 ## Phase 9 - Boss System

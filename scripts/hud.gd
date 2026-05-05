@@ -12,6 +12,7 @@ signal hero_levelup_requested(stat: String)
 signal lobby_play_requested
 signal lobby_map_select_requested
 signal lobby_upgrade_requested
+signal debug_clear_wave_requested
 
 @onready var scrap_label: Label = %ScrapLabel
 @onready var essence_label: Label = %EssenceLabel
@@ -52,6 +53,7 @@ var _upgrade_gold_label: Label
 var _upgrade_items_container: VBoxContainer
 var _upgrade_tab_buttons: Array[Button] = []
 var _current_upgrade_tab: UpgradeManager.Category = UpgradeManager.Category.TOWER
+var _debug_clear_btn: Button
 var _boss_bar_panel: Panel
 var _boss_bar_fill: ColorRect
 var _boss_bar_bg: ColorRect
@@ -77,6 +79,7 @@ func _ready() -> void:
 	_setup_lobby_panel()
 	_setup_upgrade_panel()
 	_setup_boss_bar()
+	_setup_debug_btn()
 	_setup_map_select_panel()
 	_setup_gameover_buttons()
 
@@ -168,10 +171,12 @@ func _on_phase_changed(phase: GameManager.GamePhase) -> void:
 			day_hint_label.visible = false
 			_tower_info_panel.visible = false
 			_hero_panel.visible = false
+			_debug_clear_btn.visible = true
 		GameManager.GamePhase.DAWN:
 			phase_label.text = "[ DAWN ]"
 			tower_panel.visible = false
 			day_hint_label.visible = false
+			_debug_clear_btn.visible = false
 			reset_speed()
 
 
@@ -566,6 +571,20 @@ func update_boss_hp(ratio: float) -> void:
 
 func hide_boss_hp() -> void:
 	_boss_bar_panel.visible = false
+
+
+func _setup_debug_btn() -> void:
+	_debug_clear_btn = Button.new()
+	_debug_clear_btn.text = "DBG: Clear Wave"
+	_debug_clear_btn.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
+	_debug_clear_btn.offset_left = -150.0
+	_debug_clear_btn.offset_top = -36.0
+	_debug_clear_btn.offset_right = -10.0
+	_debug_clear_btn.offset_bottom = -6.0
+	_debug_clear_btn.add_theme_font_size_override("font_size", 11)
+	_debug_clear_btn.pressed.connect(func() -> void: debug_clear_wave_requested.emit())
+	_debug_clear_btn.visible = false
+	add_child(_debug_clear_btn)
 
 
 func show_upgrade_panel() -> void:

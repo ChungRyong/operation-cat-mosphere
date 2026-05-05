@@ -20,7 +20,13 @@ var night_timer: float = 0.0
 var base_hp: float = BASE_HP
 var is_game_over: bool = false
 var active_buffs: Array[Dictionary] = []
+const SAVE_PATH: String = "user://progress.cfg"
+
 var highest_unlocked_map: int = 0
+
+
+func _ready() -> void:
+	_load_progress()
 
 
 func start_map(map_index: int) -> void:
@@ -65,6 +71,7 @@ func start_night() -> void:
 func complete_night() -> void:
 	ResourceManager.add_wave_clear_bonus()
 	ResourceManager.add_gold_can(ResourceManager.GOLD_PER_DAY_CLEAR)
+	save_progress()
 	day_cleared.emit(current_day)
 	set_phase(GamePhase.DAWN)
 
@@ -73,6 +80,7 @@ func advance_to_next_day() -> void:
 	if current_day >= DAYS_PER_MAP:
 		highest_unlocked_map = maxi(highest_unlocked_map, current_map + 1)
 		ResourceManager.add_gold_can(ResourceManager.GOLD_PER_MAP_CLEAR)
+		save_progress()
 		map_cleared.emit(current_map)
 		return
 	start_day(current_day + 1)
@@ -91,6 +99,21 @@ func damage_base(amount: float) -> void:
 		base_hp = 0.0
 		is_game_over = true
 		game_over.emit()
+
+
+func save_progress() -> void:
+	var cfg := ConfigFile.new()
+	cfg.set_value("progress", "highest_unlocked_map", highest_unlocked_map)
+	cfg.set_value("progress", "gold_can", ResourceManager.gold_can)
+	cfg.save(SAVE_PATH)
+
+
+func _load_progress() -> void:
+	var cfg := ConfigFile.new()
+	if cfg.load(SAVE_PATH) != OK:
+		return
+	highest_unlocked_map = cfg.get_value("progress", "highest_unlocked_map", 0)
+	ResourceManager.gold_can = cfg.get_value("progress", "gold_can", 0)
 
 
 func _process(delta: float) -> void:
