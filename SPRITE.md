@@ -23,8 +23,8 @@
 | Animation | Frames | FPS | Description |
 |-----------|--------|-----|-------------|
 | idle | 4 | 4 | Breathing / tail swaying |
-| walk | 6 | 8 | Left-right with horizontal flip |
-| punch | 3 | 12 | Cat punch forward motion |
+| walk | 3 | 6 | Left-right with horizontal flip |
+| punch | 4 | 12 | Cat punch forward motion |
 | parry | 2 | 8 | Shield stance + sparkle |
 | ultimate | 5 | 10 | Roar effect with screen glow |
 | hit | 2 | 10 | Damage blink |

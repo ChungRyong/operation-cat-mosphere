@@ -43,13 +43,22 @@ var _auto_atk_timer: float = 0.0
 var _blocked_count: int = 0
 var _move_target: Vector2 = Vector2.ZERO
 var _moving: bool = false
+var _sprite: AnimatedSprite2D
+var _current_anim: String = "idle"
 const ARRIVAL_DISTANCE: float = 5.0
+
+const SPRITE_DATA: Dictionary = {
+	"idle": {"path": "res://assets/sprites/hero/cheese_cat_idle.png", "frames": 4, "fps": 4.0},
+	"walk": {"path": "res://assets/sprites/hero/cheese_cat_walk.png", "frames": 3, "fps": 6.0},
+	"punch": {"path": "res://assets/sprites/hero/cheese_cat_punch.png", "frames": 4, "fps": 12.0},
+}
 
 
 func _ready() -> void:
 	current_hp = max_hp
 	add_to_group("hero")
 	GameManager.phase_changed.connect(_on_phase_changed)
+	_setup_sprite()
 
 
 func _physics_process(delta: float) -> void:
@@ -63,6 +72,8 @@ func _physics_process(delta: float) -> void:
 			global_position = _move_target
 		else:
 			velocity = diff.normalized() * speed
+			if velocity.x != 0.0 and _sprite:
+				_sprite.flip_h = velocity.x < 0.0
 			move_and_slide()
 	else:
 		velocity = Vector2.ZERO
@@ -88,6 +99,8 @@ func _physics_process(delta: float) -> void:
 			if _auto_attack():
 				_auto_atk_timer = AUTO_ATK_INTERVAL
 
+	_update_animation()
+	_update_sprite_modulate()
 	queue_redraw()
 
 
@@ -137,15 +150,53 @@ func _use_ultimate() -> void:
 			enemy.take_damage(ULTIMATE_DAMAGE, TowerData.AttackType.MYSTIC)
 
 
-func _draw() -> void:
-	var body_color := Color(1.0, 0.85, 0.3, 1.0)
-	if _invincible_timer > 0.0:
-		body_color = Color(1.0, 1.0, 0.8, 0.7 + sin(Time.get_ticks_msec() * 0.01) * 0.3)
-	draw_circle(Vector2.ZERO, 18.0, body_color)
-	draw_circle(Vector2(0, -6), 8.0, Color(1.0, 1.0, 1.0, 1.0))
-	draw_circle(Vector2(-6, 6), 5.0, Color(1.0, 1.0, 1.0, 1.0))
-	draw_circle(Vector2(6, 6), 5.0, Color(1.0, 1.0, 1.0, 1.0))
+func _setup_sprite() -> void:
+	_sprite = $Sprite as AnimatedSprite2D
+	if _sprite == null:
+		return
+	var sf := SpriteFrames.new()
+	sf.remove_animation("default")
+	for anim_name: String in SPRITE_DATA:
+		var info: Dictionary = SPRITE_DATA[anim_name]
+		sf.add_animation(anim_name)
+		sf.set_animation_speed(anim_name, info["fps"])
+		sf.set_animation_loop(anim_name, true)
+		var tex: Texture2D = load(info["path"])
+		var frame_count: int = info["frames"]
+		var frame_w: int = 64
+		var frame_h: int = 64
+		for i in frame_count:
+			var atlas := AtlasTexture.new()
+			atlas.atlas = tex
+			atlas.region = Rect2(i * frame_w, 0, frame_w, frame_h)
+			sf.add_frame(anim_name, atlas)
+	_sprite.sprite_frames = sf
+	_sprite.play("idle")
 
+
+func _update_animation() -> void:
+	if _sprite == null:
+		return
+	var target_anim: String = "idle"
+	if _punch_cd > PUNCH_COOLDOWN - 0.3:
+		target_anim = "punch"
+	elif _moving:
+		target_anim = "walk"
+	if target_anim != _current_anim:
+		_current_anim = target_anim
+		_sprite.play(_current_anim)
+
+
+func _update_sprite_modulate() -> void:
+	if _sprite == null:
+		return
+	if _invincible_timer > 0.0:
+		_sprite.modulate.a = 0.7 + sin(Time.get_ticks_msec() * 0.01) * 0.3
+	else:
+		_sprite.modulate.a = 1.0
+
+
+func _draw() -> void:
 	if _parry_active > 0.0:
 		draw_arc(Vector2.ZERO, 28.0, 0.0, TAU, 24, Color(0.3, 0.8, 1.0, 0.6), 3.0)
 
@@ -153,7 +204,7 @@ func _draw() -> void:
 		draw_arc(Vector2.ZERO, BLOCK_RANGE, 0.0, TAU, 24, Color(1.0, 0.4, 0.2, 0.3), 2.0)
 
 	var bar_w: float = 40.0
-	var bar_pos := Vector2(-bar_w * 0.5, -34.0)
+	var bar_pos := Vector2(-bar_w * 0.5, -50.0)
 	draw_rect(Rect2(bar_pos, Vector2(bar_w, 4.0)), Color(0.3, 0.0, 0.0, 1.0))
 	var hp_ratio: float = clamp(current_hp / max_hp, 0.0, 1.0)
 	draw_rect(Rect2(bar_pos, Vector2(bar_w * hp_ratio, 4.0)), Color(0.9, 0.2, 0.2, 1.0))

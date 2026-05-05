@@ -9,32 +9,32 @@
 
 ### Concept Art
 ```
-2D pixel art game character, top-down view, cute orange tabby cat with white 'socks' pattern on all four paws and white belly, standing upright on two legs, wearing a small red bandana around neck, confident leader pose, big expressive eyes, short tail raised up, 64x64 pixel sprite, transparent background, sharp edges, non-blurry, pure colors, aliased, flat shading, no gradients, no anti-aliasing, clean pixel art style
+2D pixel art game character, top-down view, cute orange tabby cat with white 'socks' pattern on all four paws and white belly, bipedal anthropomorphic mascot character, standing upright on two legs, humanoid stance, NOT on all fours, wearing a small red bandana around neck, confident leader pose, big expressive eyes, short tail raised up, 64x64 pixel sprite, transparent background, sharp edges, non-blurry, pure colors, aliased, flat shading, no gradients, no anti-aliasing, clean pixel art style
 ```
 
 ### Idle Pose
 ```
-2D pixel art, top-down view, cute orange tabby cat character standing idle, white 'socks' pattern on all four paws, white belly, red bandana, relaxed pose with slight breathing motion, tail gently swaying, 64x64 pixel sprite, transparent background, sharp edges, aliased, flat shading, no gradients, no anti-aliasing, game asset
+2D pixel art, top-down view, cute orange tabby cat character, bipedal anthropomorphic mascot, standing upright on two legs, humanoid stance, NOT on all fours, white 'socks' pattern on all four paws, white belly, red bandana, relaxed idle pose with slight breathing motion, arms resting at sides, tail gently swaying, 64x64 pixel sprite, transparent background, sharp edges, aliased, flat shading, no gradients, no anti-aliasing, game asset
 ```
 
 ### Attack Pose (Punch)
 ```
-2D pixel art, top-down view, orange tabby cat character with white socks paws punching forward with right paw, dynamic action pose, motion lines, fierce expression, red bandana flowing, 64x64 pixel sprite, transparent background, sharp edges, aliased, flat shading, no gradients, no anti-aliasing, game asset
+2D pixel art, top-down view, orange tabby cat character, bipedal anthropomorphic mascot, standing upright on two legs, humanoid stance, white socks paws, punching forward with right fist, dynamic action pose, motion lines, fierce expression, red bandana flowing, 64x64 pixel sprite, transparent background, sharp edges, aliased, flat shading, no gradients, no anti-aliasing, game asset
 ```
 
 ### Ultimate Pose (Roar)
 ```
-2D pixel art, top-down view, orange tabby cat character with white socks paws roaring with both arms raised, golden energy aura radiating outward, glowing eyes, heroic pose, red bandana, 64x64 pixel sprite, transparent background, sharp edges, aliased, flat shading, no gradients, no anti-aliasing, lighting from top-left, game asset
+2D pixel art, top-down view, orange tabby cat character, bipedal anthropomorphic mascot, standing upright on two legs, humanoid stance, white socks paws, roaring with both arms raised overhead, golden energy aura radiating outward, glowing eyes, heroic pose, red bandana, 64x64 pixel sprite, transparent background, sharp edges, aliased, flat shading, no gradients, no anti-aliasing, lighting from top-left, game asset
 ```
 
 ### Side View (Left-facing, for horizontal movement)
 ```
-2D pixel art, top-down view, orange tabby cat character with white socks paws, side profile facing left, walking pose with legs mid-stride, red bandana visible from side, tail trailing behind, 64x64 pixel sprite, transparent background, sharp edges, aliased, flat shading, no gradients, no anti-aliasing, lighting from top-left, game asset
+2D pixel art, top-down view, orange tabby cat character, bipedal anthropomorphic mascot, standing upright on two legs, humanoid stance, NOT on all fours, white socks paws, side profile facing left, walking pose with legs mid-stride, red bandana visible from side, tail trailing behind, 64x64 pixel sprite, transparent background, sharp edges, aliased, flat shading, no gradients, no anti-aliasing, lighting from top-left, game asset
 ```
 
 ### Back View (for upward movement)
 ```
-2D pixel art, top-down view, orange tabby cat character seen from behind, white socks paws visible, red bandana tied at back of neck, tail raised, walking away pose, back of ears visible, 64x64 pixel sprite, transparent background, sharp edges, aliased, flat shading, no gradients, no anti-aliasing, lighting from top-left, game asset
+2D pixel art, top-down view, orange tabby cat character, bipedal anthropomorphic mascot, standing upright on two legs, humanoid stance, NOT on all fours, white socks paws visible, seen from behind, red bandana tied at back of neck, tail raised, walking away pose, back of ears visible, 64x64 pixel sprite, transparent background, sharp edges, aliased, flat shading, no gradients, no anti-aliasing, lighting from top-left, game asset
 ```
 
 ---
