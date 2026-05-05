@@ -73,7 +73,7 @@ func _physics_process(delta: float) -> void:
 		else:
 			velocity = diff.normalized() * speed
 			if velocity.x != 0.0 and _sprite:
-				_sprite.flip_h = velocity.x < 0.0
+				_sprite.flip_h = velocity.x > 0.0
 			move_and_slide()
 	else:
 		velocity = Vector2.ZERO
@@ -98,6 +98,7 @@ func _physics_process(delta: float) -> void:
 		if _auto_atk_timer <= 0.0:
 			if _auto_attack():
 				_auto_atk_timer = AUTO_ATK_INTERVAL
+				_punch_cd = maxf(_punch_cd, 0.3)
 
 	_update_animation()
 	_update_sprite_modulate()
@@ -171,6 +172,7 @@ func _setup_sprite() -> void:
 			atlas.region = Rect2(i * frame_w, 0, frame_w, frame_h)
 			sf.add_frame(anim_name, atlas)
 	_sprite.sprite_frames = sf
+	_sprite.flip_h = true
 	_sprite.play("idle")
 
 
