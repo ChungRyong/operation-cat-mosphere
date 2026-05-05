@@ -18,6 +18,7 @@ var _floor_crits: Array[float] = []
 var _collapsing: bool = false
 var _collapse_timer: float = 0.0
 var _damage_flash: float = 0.0
+var _sfx_cooldown: float = 0.0
 
 
 func _ready() -> void:
@@ -39,6 +40,8 @@ func _process(delta: float) -> void:
 	for i in _floor_stun_cds.size():
 		if _floor_stun_cds[i] > 0.0:
 			_floor_stun_cds[i] -= delta
+	if _sfx_cooldown > 0.0:
+		_sfx_cooldown -= delta
 	if _damage_flash > 0.0:
 		_damage_flash -= delta
 		queue_redraw()
@@ -109,14 +112,17 @@ func repair() -> bool:
 func take_damage(amount: float) -> void:
 	current_health -= amount
 	_damage_flash = 0.2
+	SfxManager.play("tower_hit")
 	queue_redraw()
 	if current_health <= 0.0:
+		SfxManager.play("collapse")
 		destroyed.emit()
 		queue_free()
 		return
 	if not _collapsing and current_health <= get_effective_max_hp() * TowerData.COLLAPSE_THRESHOLD and floors.size() > 1:
 		_collapsing = true
 		_collapse_timer = 2.0
+		SfxManager.play("collapse")
 
 
 func get_sell_value() -> int:
@@ -211,6 +217,9 @@ func _shoot(floor_index: int, target: Node2D) -> void:
 	get_tree().current_scene.add_child(bullet)
 	bullet.global_position = global_position + Vector2(0, -floor_index * 12.0)
 	bullet.launch(target, _get_buffed_damage(fd), fd.projectile_speed, fd.attack_type, is_crit, stun_val, self)
+	if _sfx_cooldown <= 0.0:
+		SfxManager.play("shoot")
+		_sfx_cooldown = 0.15
 
 	if can_stun:
 		_floor_stun_cds[floor_index] = fd.stun_cooldown

@@ -71,15 +71,15 @@
 - [ ] 3 tower type sprites (stacking visuals per floor)
 - [ ] 6 enemy type sprites
 - [ ] Effects (explosion, stun, reflect, ultimate)
-- [ ] SFX (attack, build, destroy, UI)
-- [ ] BGM (Day/Night themes)
+- [x] SFX (attack, build, destroy, UI) — procedural placeholder sounds
+- [x] BGM (Day/Night/Dawn/Menu themes) — procedural placeholder loops
 
 ## Phase 6 - Balance & Polish
 
 **Goal:** Ship-ready quality
 
-- [ ] PRD-based balance verification (DPS calculations)
-- [ ] Per-stage difficulty curve tuning
+- [x] PRD-based balance verification (DPS calculations)
+- [x] Per-stage difficulty curve tuning
 - [ ] UI theme & font application
 - [ ] Tutorial guide (Stage 1)
 - [x] Game over / restart flow polish (stats display, styled panel, Cat HQ button, speed reset)

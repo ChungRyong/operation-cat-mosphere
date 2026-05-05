@@ -93,6 +93,7 @@ func _physics_process(delta: float) -> void:
 
 func _punch() -> void:
 	_punch_cd = PUNCH_COOLDOWN
+	SfxManager.play("punch")
 	var damage: float = _get_atk() * PUNCH_MULTIPLIER
 	var enemies: Array = get_tree().get_nodes_in_group("enemies")
 	for enemy in enemies:
@@ -106,6 +107,7 @@ func _punch() -> void:
 func _start_parry() -> void:
 	_parry_cd = PARRY_COOLDOWN
 	_parry_active = PARRY_WINDOW
+	SfxManager.play("parry")
 
 
 func is_parrying() -> bool:
@@ -119,6 +121,7 @@ func take_damage(amount: float) -> void:
 		return
 	current_hp -= amount
 	_invincible_timer = HIT_IFRAME
+	SfxManager.play("hero_hit")
 	health_changed.emit(current_hp)
 	if current_hp <= 0.0:
 		current_hp = 0.0
@@ -127,6 +130,7 @@ func take_damage(amount: float) -> void:
 func _use_ultimate() -> void:
 	ultimate_available = false
 	_invincible_timer = ULTIMATE_INVINCIBLE
+	SfxManager.play("ultimate")
 	var enemies: Array = get_tree().get_nodes_in_group("enemies")
 	for enemy in enemies:
 		if is_instance_valid(enemy) and enemy.has_method("take_damage"):

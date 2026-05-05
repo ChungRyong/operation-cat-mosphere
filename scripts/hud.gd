@@ -188,6 +188,7 @@ func _on_phase_changed(phase: GameManager.GamePhase) -> void:
 
 
 func _on_dawn_card_selected(card: Dictionary) -> void:
+	SfxManager.play("ui_click")
 	dawn_panel.visible = false
 	dawn_card_picked.emit(card)
 
@@ -222,6 +223,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _on_speed_pressed() -> void:
+	SfxManager.play("ui_click")
 	_speed_index = (_speed_index + 1) % SPEED_STEPS.size()
 	var spd: float = SPEED_STEPS[_speed_index]
 	Engine.time_scale = spd
@@ -756,7 +758,10 @@ func _create_level_bar(current: int, max_val: int) -> HBoxContainer:
 
 
 func _on_upgrade_buy(id: String) -> void:
-	UpgradeManager.purchase(id)
+	if UpgradeManager.purchase(id):
+		SfxManager.play("level_up")
+	else:
+		SfxManager.play("ui_click")
 	_upgrade_gold_label.text = "Gold Cans: %d" % ResourceManager.gold_can
 	_refresh_upgrade_items()
 

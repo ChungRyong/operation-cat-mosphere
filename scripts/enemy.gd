@@ -90,6 +90,7 @@ func take_damage(amount: float, attack_type: TowerData.AttackType) -> void:
 	current_health -= final_dmg
 	queue_redraw()
 	if current_health <= 0.0:
+		SfxManager.play("enemy_die")
 		_on_die()
 
 

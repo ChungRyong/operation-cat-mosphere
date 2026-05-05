@@ -67,6 +67,7 @@ func _on_day_started(day: int) -> void:
 		hero.global_position = Vector2(640, 360)
 	_build_mode = true
 	hud.set_build_mode(true)
+	SfxManager.play_bgm("bgm_day")
 	queue_redraw()
 
 
@@ -123,6 +124,8 @@ func _transition_to_night() -> void:
 	hud.set_build_mode(false)
 	GameManager.start_night()
 	wave_manager.start()
+	SfxManager.play("wave_start")
+	SfxManager.play_bgm("bgm_night")
 	queue_redraw()
 
 
@@ -142,10 +145,12 @@ func _on_wave_finished() -> void:
 
 
 func _finish_night() -> void:
+	SfxManager.play("wave_clear")
 	GameManager.complete_night()
 	if GameManager.current_day >= GameManager.DAYS_PER_MAP:
 		GameManager.advance_to_next_day()
 		return
+	SfxManager.play_bgm("bgm_dawn")
 	var cards: Array[Dictionary] = BuffLibrary.pick_random_cards(3)
 	if cards.is_empty():
 		GameManager.advance_to_next_day()
@@ -163,6 +168,7 @@ func _spawn_boss(boss_data: BossData) -> void:
 	add_child(boss)
 	_current_boss = boss
 	hud.show_boss_hp(boss_data.boss_name, 1.0)
+	SfxManager.play("boss_roar")
 
 
 func _on_boss_defeated(_boss_data: BossData) -> void:
@@ -215,11 +221,14 @@ func _on_map_cleared(_map_index: int) -> void:
 func _on_game_over() -> void:
 	wave_manager.stop()
 	_cleanup_boss()
+	SfxManager.play("game_over")
+	SfxManager.stop_bgm()
 
 
 func _show_lobby() -> void:
 	GameManager.set_phase(GameManager.GamePhase.MENU)
 	hud.show_lobby()
+	SfxManager.play_bgm("bgm_menu")
 
 
 func _show_map_select() -> void:
@@ -305,6 +314,7 @@ func _on_tower_add_floor(floor_data: TowerData) -> void:
 	if _selected_tower == null or not is_instance_valid(_selected_tower):
 		return
 	if _selected_tower.add_floor(floor_data):
+		SfxManager.play("build")
 		hud.update_tower_info(_selected_tower)
 
 
@@ -312,6 +322,7 @@ func _on_tower_repair() -> void:
 	if _selected_tower == null or not is_instance_valid(_selected_tower):
 		return
 	if _selected_tower.repair():
+		SfxManager.play("repair")
 		hud.update_tower_info(_selected_tower)
 
 
@@ -323,6 +334,7 @@ func _on_tower_sell() -> void:
 	_selected_tower.queue_free()
 	_selected_tower = null
 	hud.hide_tower_info()
+	SfxManager.play("sell")
 	queue_redraw()
 
 
@@ -342,6 +354,7 @@ func _on_hero_levelup(stat: String) -> void:
 		"atk": success = hero.level_up_atk()
 		"spd": success = hero.level_up_spd()
 	if success:
+		SfxManager.play("level_up")
 		hud.update_hero_panel(hero)
 		hud.update_hero_hp(hero.current_hp)
 
@@ -373,6 +386,7 @@ func _try_place_tower(click_pos: Vector2) -> void:
 	tower.global_position = snap_pos
 	tower_container.add_child(tower)
 	_placing_tower = null
+	SfxManager.play("build")
 	queue_redraw()
 
 
