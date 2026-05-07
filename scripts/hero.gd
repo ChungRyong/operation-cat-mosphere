@@ -45,10 +45,17 @@ var _move_target: Vector2 = Vector2.ZERO
 var _moving: bool = false
 var _sprite: AnimatedSprite2D
 var _current_anim: String = "idle"
+var _idle_tween: Tween
 const ARRIVAL_DISTANCE: float = 5.0
 
+const IDLE_BASE_SCALE: float = 1.0
+const IDLE_IMG_HALF_H: float = 32.0
+const SQUASH_FACTOR: Vector2 = Vector2(1.1, 0.9)
+const STRETCH_FACTOR: Vector2 = Vector2(0.95, 1.05)
+const SQUASH_STRETCH_TIME: float = 0.35
+
 const SPRITE_DATA: Dictionary = {
-	"idle": {"path": "res://assets/sprites/hero/cheese_cat_idle.png", "frames": 4, "fps": 4.0},
+	"idle": {"path": "res://assets/sprites/hero/cheese_cat_idle 복사본.png", "frames": 1, "fps": 1.0, "full_image": true},
 	"walk": {"path": "res://assets/sprites/hero/cheese_cat_walk.png", "frames": 3, "fps": 6.0},
 	"punch": {"path": "res://assets/sprites/hero/cheese_cat_punch.png", "frames": 4, "fps": 12.0},
 }
@@ -86,19 +93,18 @@ func _physics_process(delta: float) -> void:
 	if _parry_active > 0.0:
 		_parry_active -= delta
 
-	if Input.is_action_just_pressed("attack") and _punch_cd <= 0.0:
-		_punch()
-	if Input.is_action_just_pressed("parry") and _parry_cd <= 0.0:
-		_start_parry()
-	if Input.is_action_just_pressed("ultimate") and ultimate_available:
-		_use_ultimate()
+	if GameManager.current_phase == GameManager.GamePhase.NIGHT:
+		if Input.is_action_just_pressed("parry") and _parry_cd <= 0.0:
+			_start_parry()
+		if Input.is_action_just_pressed("ultimate") and ultimate_available:
+			_use_ultimate()
 
 	if GameManager.current_phase == GameManager.GamePhase.NIGHT and current_hp > 0.0:
 		_auto_atk_timer -= delta
 		if _auto_atk_timer <= 0.0:
-			if _auto_attack():
+			if _has_enemy_in_range() and _punch_cd <= 0.0:
+				_punch()
 				_auto_atk_timer = AUTO_ATK_INTERVAL
-				_punch_cd = maxf(_punch_cd, 0.3)
 
 	_update_animation()
 	_update_sprite_modulate()
@@ -116,6 +122,7 @@ func _punch() -> void:
 		if global_position.distance_to(enemy.global_position) <= ATTACK_RANGE:
 			if enemy.has_method("take_damage"):
 				enemy.take_damage(damage, TowerData.AttackType.LOW_TECH)
+				VFX.spawn(get_tree().current_scene, enemy.global_position, VFX.Type.EXPLOSION, Color(1.0, 0.8, 0.3))
 
 
 func _start_parry() -> void:
@@ -145,6 +152,7 @@ func _use_ultimate() -> void:
 	ultimate_available = false
 	_invincible_timer = ULTIMATE_INVINCIBLE
 	SfxManager.play("ultimate")
+	VFX.spawn(get_tree().current_scene, global_position, VFX.Type.ULTIMATE)
 	var enemies: Array = get_tree().get_nodes_in_group("enemies")
 	for enemy in enemies:
 		if is_instance_valid(enemy) and enemy.has_method("take_damage"):
@@ -163,17 +171,23 @@ func _setup_sprite() -> void:
 		sf.set_animation_speed(anim_name, info["fps"])
 		sf.set_animation_loop(anim_name, true)
 		var tex: Texture2D = load(info["path"])
-		var frame_count: int = info["frames"]
-		var frame_w: int = 64
-		var frame_h: int = 64
-		for i in frame_count:
-			var atlas := AtlasTexture.new()
-			atlas.atlas = tex
-			atlas.region = Rect2(i * frame_w, 0, frame_w, frame_h)
-			sf.add_frame(anim_name, atlas)
+		if info.get("full_image", false):
+			sf.add_frame(anim_name, tex)
+		else:
+			var frame_count: int = info["frames"]
+			var frame_w: int = 64
+			var frame_h: int = 64
+			for i in frame_count:
+				var atlas := AtlasTexture.new()
+				atlas.atlas = tex
+				atlas.region = Rect2(i * frame_w, 0, frame_w, frame_h)
+				sf.add_frame(anim_name, atlas)
 	_sprite.sprite_frames = sf
 	_sprite.flip_h = true
+	_sprite.scale = Vector2(IDLE_BASE_SCALE, IDLE_BASE_SCALE)
+	_sprite.position.y = -IDLE_IMG_HALF_H * IDLE_BASE_SCALE
 	_sprite.play("idle")
+	_start_idle_squash_stretch()
 
 
 func _update_animation() -> void:
@@ -187,6 +201,41 @@ func _update_animation() -> void:
 	if target_anim != _current_anim:
 		_current_anim = target_anim
 		_sprite.play(_current_anim)
+		if _current_anim == "idle":
+			var s := IDLE_BASE_SCALE
+			_sprite.scale = Vector2(s, s)
+			_sprite.position = Vector2(0, -IDLE_IMG_HALF_H * s)
+			_start_idle_squash_stretch()
+		else:
+			_stop_idle_squash_stretch()
+			_sprite.scale = Vector2.ONE
+			_sprite.position = Vector2(0, -32)
+
+
+func _start_idle_squash_stretch() -> void:
+	_stop_idle_squash_stretch()
+	var base := Vector2(IDLE_BASE_SCALE, IDLE_BASE_SCALE)
+	var squash := base * SQUASH_FACTOR
+	var stretch := base * STRETCH_FACTOR
+	var base_y := -IDLE_IMG_HALF_H * base.y
+	var squash_y := -IDLE_IMG_HALF_H * squash.y
+	var stretch_y := -IDLE_IMG_HALF_H * stretch.y
+	var dur := SQUASH_STRETCH_TIME
+	_idle_tween = create_tween().set_loops()
+	_idle_tween.tween_property(_sprite, "scale", squash, dur).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE)
+	_idle_tween.parallel().tween_property(_sprite, "position:y", squash_y, dur).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE)
+	_idle_tween.tween_property(_sprite, "scale", base, dur).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE)
+	_idle_tween.parallel().tween_property(_sprite, "position:y", base_y, dur).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE)
+	_idle_tween.tween_property(_sprite, "scale", stretch, dur).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE)
+	_idle_tween.parallel().tween_property(_sprite, "position:y", stretch_y, dur).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE)
+	_idle_tween.tween_property(_sprite, "scale", base, dur).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE)
+	_idle_tween.parallel().tween_property(_sprite, "position:y", base_y, dur).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE)
+
+
+func _stop_idle_squash_stretch() -> void:
+	if _idle_tween and _idle_tween.is_valid():
+		_idle_tween.kill()
+		_idle_tween = null
 
 
 func _update_sprite_modulate() -> void:
@@ -262,21 +311,13 @@ func _get_move_speed() -> float:
 	return spd
 
 
-func _auto_attack() -> bool:
+func _has_enemy_in_range() -> bool:
 	var enemies: Array = get_tree().get_nodes_in_group("enemies")
-	var nearest: Node = null
-	var nearest_dist: float = BLOCK_RANGE + 10.0
 	for enemy in enemies:
 		if not is_instance_valid(enemy):
 			continue
-		var dist: float = global_position.distance_to(enemy.global_position)
-		if dist < nearest_dist:
-			nearest_dist = dist
-			nearest = enemy
-	if nearest != null and nearest.has_method("take_damage"):
-		var damage: float = _get_atk() * AUTO_ATK_DAMAGE_MULT
-		nearest.take_damage(damage, TowerData.AttackType.LOW_TECH)
-		return true
+		if global_position.distance_to(enemy.global_position) <= ATTACK_RANGE:
+			return true
 	return false
 
 

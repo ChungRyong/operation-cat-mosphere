@@ -20,6 +20,8 @@ var _tower_target: Node2D = null
 var _tower_atk_timer: float = 0.0
 var _tower_attack_flash: float = 0.0
 var _returning: bool = false
+var _idle_scale: Vector2 = Vector2.ONE
+var _idle_tween: Tween
 
 
 func _ready() -> void:
@@ -28,6 +30,8 @@ func _ready() -> void:
 	if data == null:
 		return
 	current_health = data.max_health
+	if data.texture != null:
+		_start_idle_animation()
 	queue_redraw()
 
 
@@ -42,11 +46,15 @@ func init_pooled(enemy_data: EnemyData) -> void:
 	_tower_atk_timer = 0.0
 	_tower_attack_flash = 0.0
 	_returning = false
+	_idle_scale = Vector2.ONE
 	progress = 0.0
 	set_process(true)
+	if data.texture != null:
+		_start_idle_animation()
 
 
 func _cleanup_for_pool() -> void:
+	_stop_idle_animation()
 	_cleanup_engagement()
 	for conn in died.get_connections():
 		died.disconnect(conn["callable"])
@@ -64,6 +72,8 @@ func _return_to_pool() -> void:
 func _process(delta: float) -> void:
 	if data == null:
 		return
+	if _idle_tween and _idle_tween.is_valid():
+		queue_redraw()
 	if _stun_timer > 0.0:
 		_stun_timer -= delta
 		return
@@ -104,6 +114,7 @@ func is_gimmick_distractor() -> bool:
 
 
 func _on_die() -> void:
+	VFX.spawn(get_tree().current_scene, global_position, VFX.Type.EXPLOSION, data.color)
 	if data.spawn_on_death != null and data.spawn_count > 0:
 		_spawn_children()
 	ResourceManager.add_essence(data.essence_reward)
@@ -132,8 +143,10 @@ func _draw() -> void:
 	if data.texture != null:
 		var tex_size: Vector2 = data.texture.get_size()
 		var scale_factor: float = (data.radius * 2.0) / max(tex_size.x, tex_size.y)
-		var draw_size: Vector2 = tex_size * scale_factor
-		draw_texture_rect(data.texture, Rect2(-draw_size * 0.5, draw_size), false)
+		var base_size: Vector2 = tex_size * scale_factor
+		var draw_size: Vector2 = base_size * _idle_scale
+		var anchor_y: float = base_size.y * (1.0 - _idle_scale.y) * 0.5
+		draw_texture_rect(data.texture, Rect2(Vector2(-draw_size.x * 0.5, -draw_size.y * 0.5 + anchor_y), draw_size), false)
 	else:
 		draw_circle(Vector2.ZERO, data.radius, data.color)
 	if _stun_timer > 0.0:
@@ -243,6 +256,26 @@ func _get_hero() -> CharacterBody2D:
 	if heroes.is_empty():
 		return null
 	return heroes[0] as CharacterBody2D
+
+
+func _start_idle_animation() -> void:
+	_stop_idle_animation()
+	_idle_tween = create_tween().set_loops()
+	var squash := Vector2(1.15, 0.85)
+	var stretch := Vector2(0.92, 1.08)
+	var base := Vector2.ONE
+	var dur := 0.3
+	_idle_tween.tween_property(self, "_idle_scale", squash, dur).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE)
+	_idle_tween.tween_property(self, "_idle_scale", base, dur).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE)
+	_idle_tween.tween_property(self, "_idle_scale", stretch, dur).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE)
+	_idle_tween.tween_property(self, "_idle_scale", base, dur).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE)
+
+
+func _stop_idle_animation() -> void:
+	if _idle_tween and _idle_tween.is_valid():
+		_idle_tween.kill()
+		_idle_tween = null
+	_idle_scale = Vector2.ONE
 
 
 func _cleanup_engagement() -> void:

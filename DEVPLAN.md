@@ -70,7 +70,7 @@
 - [ ] Cheese Cat hero sprite + animations
 - [ ] 3 tower type sprites (stacking visuals per floor)
 - [ ] 6 enemy type sprites
-- [ ] Effects (explosion, stun, reflect, ultimate)
+- [x] Effects (explosion, stun, reflect, ultimate) — VFX system with procedural particles
 - [x] SFX (attack, build, destroy, UI) — procedural placeholder sounds
 - [x] BGM (Day/Night/Dawn/Menu themes) — procedural placeholder loops
 

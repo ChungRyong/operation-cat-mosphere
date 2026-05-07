@@ -34,15 +34,26 @@ func _hit_target() -> void:
 		queue_free()
 		return
 
+	var vfx_parent: Node = get_tree().current_scene
 	if _target.has_method("take_damage"):
 		if _target.data != null and DamageCalculator.is_reflected(_attack_type, _target.data.defense_type):
 			var reflect_dmg: float = DamageCalculator.get_reflect_damage(_damage, _attack_type, _target.data.defense_type)
 			if is_instance_valid(_source_tower) and _source_tower.has_method("take_damage"):
 				_source_tower.take_damage(reflect_dmg)
+			VFX.spawn(vfx_parent, global_position, VFX.Type.REFLECT)
+			SfxManager.play("reflect")
 		else:
 			_target.take_damage(_damage, _attack_type)
+			var hit_color: Color
+			match _attack_type:
+				TowerData.AttackType.LOW_TECH: hit_color = Color(0.8, 0.6, 0.3)
+				TowerData.AttackType.HI_TECH: hit_color = Color(0.3, 0.7, 1.0)
+				TowerData.AttackType.MYSTIC: hit_color = Color(0.8, 0.4, 1.0)
+				_: hit_color = Color.WHITE
+			VFX.spawn(vfx_parent, global_position, VFX.Type.EXPLOSION, hit_color)
 			if _stun_duration > 0.0 and _target.has_method("apply_stun"):
 				_target.apply_stun(_stun_duration)
+				VFX.spawn(vfx_parent, _target.global_position, VFX.Type.STUN)
 	queue_free()
 
 
