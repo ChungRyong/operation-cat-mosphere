@@ -12,4 +12,4 @@ script = ExtResource("1")
 shape = SubResource("CircleShape2D_1")
 
 [node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=430947184]
-position = Vector2(0, -32)
+position = Vector2(0, -17)

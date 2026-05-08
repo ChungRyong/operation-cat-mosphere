@@ -50,6 +50,7 @@ const ARRIVAL_DISTANCE: float = 5.0
 
 const IDLE_BASE_SCALE: float = 1.0
 const IDLE_IMG_HALF_H: float = 32.0
+const SPRITE_Y_OFFSET: float = 15.0
 const SQUASH_FACTOR: Vector2 = Vector2(1.1, 0.9)
 const STRETCH_FACTOR: Vector2 = Vector2(0.95, 1.05)
 const SQUASH_STRETCH_TIME: float = 0.35
@@ -185,7 +186,7 @@ func _setup_sprite() -> void:
 	_sprite.sprite_frames = sf
 	_sprite.flip_h = true
 	_sprite.scale = Vector2(IDLE_BASE_SCALE, IDLE_BASE_SCALE)
-	_sprite.position.y = -IDLE_IMG_HALF_H * IDLE_BASE_SCALE
+	_sprite.position.y = -IDLE_IMG_HALF_H * IDLE_BASE_SCALE + SPRITE_Y_OFFSET
 	_sprite.play("idle")
 	_start_idle_squash_stretch()
 
@@ -204,12 +205,12 @@ func _update_animation() -> void:
 		if _current_anim == "idle":
 			var s := IDLE_BASE_SCALE
 			_sprite.scale = Vector2(s, s)
-			_sprite.position = Vector2(0, -IDLE_IMG_HALF_H * s)
+			_sprite.position = Vector2(0, -IDLE_IMG_HALF_H * s + SPRITE_Y_OFFSET)
 			_start_idle_squash_stretch()
 		else:
 			_stop_idle_squash_stretch()
 			_sprite.scale = Vector2.ONE
-			_sprite.position = Vector2(0, -32)
+			_sprite.position = Vector2(0, -IDLE_IMG_HALF_H + SPRITE_Y_OFFSET)
 
 
 func _start_idle_squash_stretch() -> void:
@@ -217,9 +218,9 @@ func _start_idle_squash_stretch() -> void:
 	var base := Vector2(IDLE_BASE_SCALE, IDLE_BASE_SCALE)
 	var squash := base * SQUASH_FACTOR
 	var stretch := base * STRETCH_FACTOR
-	var base_y := -IDLE_IMG_HALF_H * base.y
-	var squash_y := -IDLE_IMG_HALF_H * squash.y
-	var stretch_y := -IDLE_IMG_HALF_H * stretch.y
+	var base_y := -IDLE_IMG_HALF_H * base.y + SPRITE_Y_OFFSET
+	var squash_y := -IDLE_IMG_HALF_H * squash.y + SPRITE_Y_OFFSET
+	var stretch_y := -IDLE_IMG_HALF_H * stretch.y + SPRITE_Y_OFFSET
 	var dur := SQUASH_STRETCH_TIME
 	_idle_tween = create_tween().set_loops()
 	_idle_tween.tween_property(_sprite, "scale", squash, dur).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE)

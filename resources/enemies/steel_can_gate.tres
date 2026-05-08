@@ -1,6 +1,7 @@
-[gd_resource type="Resource" script_class="EnemyData" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="EnemyData" load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://scripts/enemy_data.gd" id="1"]
+[ext_resource type="Texture2D" uid="uid://dk6vuhuhmhr70" path="res://assets/sprites/enemies/SteelCanGate_Concept.png" id="2"]
 
 [resource]
 script = ExtResource("1")
@@ -12,6 +13,7 @@ speed = 1.0
 essence_reward = 50
 color = Color(0.5, 0.5, 0.5, 1.0)
 radius = 30.0
+texture = ExtResource("2")
 spawn_count = 0
 attacks_towers = true
 tower_damage = 50.0
