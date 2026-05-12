@@ -208,36 +208,106 @@
 
 ---
 
-## 3. Enemies
+## 3. Enemies (18 types)
 
-### 3-1. Jelly Slime (Swarm)
+### Base Roster (Map 01~)
+
+#### 3-1. Jelly Slime (Swarm)
 ```
 2D pixel art game enemy, top-down view, small green alien jelly slime blob, translucent body with cute dot eyes and small smile, simple round droplet shape, shiny highlight on top, bright green color, 48x48 pixel sprite, transparent background, sharp edges, aliased, flat shading, no gradients, no anti-aliasing, game asset
 ```
 
-### 3-2. Mini Slime (Swarm)
+#### 3-2. Mini Slime (Swarm)
 ```
 2D pixel art game enemy, top-down view, tiny green alien jelly slime, smaller and lighter green than regular slime, simple dot eyes, very small and fast looking, minimal detail, 32x32 pixel sprite, transparent background, sharp edges, aliased, flat shading, no gradients, no anti-aliasing, game asset
 ```
 
-### 3-3. Jelly Carrier (Swarm)
+#### 3-3. Jelly Carrier (Swarm)
 ```
 2D pixel art game enemy, top-down view, large translucent green alien jelly blob, semi-transparent body with 5 small mini slimes visible inside, bigger and rounder than regular slime, slow and heavy appearance, dark green outline, 64x64 pixel sprite, transparent background, sharp edges, aliased, flat shading, no gradients, no anti-aliasing, game asset
 ```
 
-### 3-4. Laser Pointer (Gimmick)
+#### 3-4. Laser Pointer (Gimmick)
 ```
 2D pixel art game enemy, top-down view, red glowing alien jelly creature, emitting bright red laser light from its body, angular aggressive shape, glowing red aura, fast and agile appearance, bright red and orange colors, 48x48 pixel sprite, transparent background, sharp edges, aliased, flat shading, no gradients, no anti-aliasing, game asset
 ```
 
-### 3-5. Mirror Craft (Counter)
+#### 3-5. Mirror Craft (Counter)
 ```
 2D pixel art game enemy, top-down view, silver metallic alien jelly with mirror-like reflective surface, crystalline facets on body, light blue and silver colors, sleek and fast appearance, reflective shine highlights, 48x48 pixel sprite, transparent background, sharp edges, aliased, flat shading, no gradients, no anti-aliasing, game asset
 ```
 
-### 3-6. Steel Can Gate (Elite)
+#### 3-6. Steel Can Gate (Elite)
 ```
 2D pixel art game enemy, top-down view, massive armored steel can alien robot, grey heavy metal body with rivets and bolts, angry red eyes, tank-like sturdy design, scratched and battle-worn metal texture, intimidating and slow, 96x96 pixel sprite, transparent background, sharp edges, aliased, flat shading, no gradients, no anti-aliasing, game asset
+```
+
+### Tier 1 — Map 02~03
+
+#### 3-7. Jelly Sprinter (Swarm)
+```
+2D pixel art game enemy, top-down view, streamlined cyan alien jelly slime, elongated teardrop aerodynamic shape, speed motion lines trailing behind body, small and sleek, bright cyan-green color, determined dot eyes, 48x48 pixel sprite, transparent background, sharp edges, aliased, flat shading, no gradients, no anti-aliasing, game asset
+```
+
+#### 3-8. Gel Medic (Support)
+```
+2D pixel art game enemy, top-down view, white and pink alien jelly healer, gentle round body with green cross symbol on chest, soft green healing glow aura around body, kind dot eyes, small first-aid kit motif on side, non-threatening peaceful appearance, white pink and green colors, 48x48 pixel sprite, transparent background, sharp edges, aliased, flat shading, no gradients, no anti-aliasing, game asset
+```
+
+#### 3-9. Shadow Jelly (Gimmick)
+```
+2D pixel art game enemy, top-down view, dark purple-black alien jelly creature, semi-transparent shadowy body with smoky trails, only glowing yellow eyes clearly visible, stealth assassin vibe, dark purple and black colors with faint outline, 48x48 pixel sprite, transparent background, sharp edges, aliased, flat shading, no gradients, no anti-aliasing, game asset
+```
+
+### Tier 2 — Map 04~06
+
+#### 3-10. Plasma Drone (Counter)
+```
+2D pixel art game enemy, top-down view, metallic silver alien flying drone with mirror-like shell, small rotating propeller blades on top, red targeting laser beam pointing downward, hovering above ground, sleek sci-fi design, silver and red colors with mirror reflections, 48x48 pixel sprite, transparent background, sharp edges, aliased, flat shading, no gradients, no anti-aliasing, game asset
+```
+
+#### 3-11. Gel Bomber (Gimmick)
+```
+2D pixel art game enemy, top-down view, bloated yellow-green alien jelly filled with bubbling liquid, looks ready to burst, darker vein patterns visible through translucent body, unstable wobbly appearance, yellow-green with dark veins, 48x48 pixel sprite, transparent background, sharp edges, aliased, flat shading, no gradients, no anti-aliasing, game asset
+```
+
+#### 3-12. Volt Jelly (Counter)
+```
+2D pixel art game enemy, top-down view, electric blue alien jelly with yellow lightning bolt patterns on body, bright electric sparks crackling across surface, steel can shell fragments embedded in translucent body, dangerous electrified appearance, electric blue and yellow with grey metal bits, 48x48 pixel sprite, transparent background, sharp edges, aliased, flat shading, no gradients, no anti-aliasing, game asset
+```
+
+### Tier 3 — Map 07~09
+
+#### 3-13. Storm Caller (Support)
+```
+2D pixel art game enemy, top-down view, dark blue alien jelly with swirling wind aura, cloud-like white wisps orbiting body, mirror-like reflective surface with storm cloud patterns, imposing weather controller vibe, dark blue and white with mirror sheen, 64x64 pixel sprite, transparent background, sharp edges, aliased, flat shading, no gradients, no anti-aliasing, game asset
+```
+
+#### 3-14. Cage Jelly (Gimmick)
+```
+2D pixel art game enemy, top-down view, dark grey armored alien jelly with cage-like metal bars forming exterior shell, steel can plating on body, trap jaw mechanism visible at front, walking prison cell appearance, dark grey and iron colors with rivets, 64x64 pixel sprite, transparent background, sharp edges, aliased, flat shading, no gradients, no anti-aliasing, game asset
+```
+
+#### 3-15. Iron Express (Elite)
+```
+2D pixel art game enemy, top-down view, massive elongated steel can alien with train-like front battering ram, red warning lights on sides, exhaust pipes on back emitting smoke, armored locomotive tank design, scratched battle-worn grey metal with red warning lights, 96x72 pixel sprite, transparent background, sharp edges, aliased, flat shading, no gradients, no anti-aliasing, game asset
+```
+
+### Tier 4 — Map 10~12
+
+#### 3-16. Phase Shifter (Counter)
+```
+2D pixel art game enemy, top-down view, translucent purple alien jelly that flickers between visible and invisible, prismatic rainbow shimmer effect on body, mirror-like surface with dimensional crack patterns, ethereal and unstable appearance, purple with prismatic rainbow and mirror sheen, 48x48 pixel sprite, transparent background, sharp edges, aliased, flat shading, no gradients, no anti-aliasing, game asset
+```
+
+#### 3-17. Queen Jelly (Elite)
+```
+2D pixel art game enemy, top-down view, giant dark red alien jelly queen, large round body with golden crown and royal mantle pattern, regal and imposing, multiple small mini slimes visibly forming inside translucent body, glowing yellow eyes, dark red with gold crown accents, 96x96 pixel sprite, transparent background, sharp edges, aliased, flat shading, no gradients, no anti-aliasing, game asset
+```
+
+#### 3-18. Gravity Blob (Elite)
+```
+2D pixel art game enemy, top-down view, massive dark purple-black alien jelly with visible gravity distortion field, light and space bending around its dense body, planet-like appearance with small debris orbiting around it, heavy and ominous, dark purple-black with distortion ripple effect, 96x96 pixel sprite, transparent background, sharp edges, aliased, flat shading, no gradients, no anti-aliasing, game asset
 ```
 
 ---
