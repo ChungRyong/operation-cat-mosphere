@@ -41,26 +41,26 @@
 
 ## 2. Towers (Cat-Built Defense Line)
 
-> All towers are built by cats — every tower is mounted on a **cat tree / cat furniture base**. Each floor segment is **96x64 px** for visible stacking detail. Cat-themed decorations (paw prints, cat ears, scratching post texture) are essential.
+> All towers are built by cats — every tower is mounted on a **cat tree / cat furniture base**. Each floor segment is **96x48 px** for visible stacking detail. Cat-themed decorations (paw prints, cat ears, scratching post texture) are essential.
 
 ### 2-1. Fish Bone Launcher (Low-tech)
 ```
-2D pixel art game tower, top-down view, DIY fish bone catapult mounted on a scratching post cat tree base, cardboard box body with cat paw prints stamped on it, loaded with a fish bone projectile, yarn string trigger mechanism, crude handmade look, brown and tan colors, 96x64 pixel sprite per floor segment, transparent background, sharp edges, aliased, flat shading, no gradients, no anti-aliasing, game asset
+2D pixel art game tower, top-down view, DIY fish bone catapult mounted on a scratching post cat tree base, cardboard box body with cat paw prints stamped on it, loaded with a fish bone projectile, yarn string trigger mechanism, crude handmade look, brown and tan colors, 96x48 pixel sprite per floor segment, transparent background, sharp edges, aliased, flat shading, no gradients, no anti-aliasing, game asset
 ```
 
 ### 2-2. Plasma Laser (Hi-tech)
 ```
-2D pixel art game tower, top-down view, high-tech laser turret mounted on a luxury cat tree platform base, metallic silver body with glowing blue LED strips, cat ear shaped satellite dish on top, cat toy ball as energy core, sci-fi design blended with cat furniture aesthetic, blue energy glow, 96x64 pixel sprite per floor segment, transparent background, sharp edges, aliased, flat shading, no gradients, no anti-aliasing, game asset
+2D pixel art game tower, top-down view, high-tech laser turret mounted on a luxury cat tree platform base, metallic silver body with glowing blue LED strips, cat ear shaped satellite dish on top, cat toy ball as energy core, sci-fi design blended with cat furniture aesthetic, blue energy glow, 96x48 pixel sprite per floor segment, transparent background, sharp edges, aliased, flat shading, no gradients, no anti-aliasing, game asset
 ```
 
 ### 2-3. Mjolnir Coil (Mystic)
 ```
-2D pixel art game tower, top-down view, mystical tesla coil tower mounted on an ancient cat shrine base, dark purple metal with bright purple lightning arcs, cat paw rune symbols carved on base, cat bell hanging from coil tip, magical arcane aesthetic mixed with cat temple motif, electric sparks, 96x64 pixel sprite per floor segment, transparent background, sharp edges, aliased, flat shading, no gradients, no anti-aliasing, game asset
+2D pixel art game tower, top-down view, mystical tesla coil tower mounted on an ancient cat shrine base, dark purple metal with bright purple lightning arcs, cat paw rune symbols carved on base, cat bell hanging from coil tip, magical arcane aesthetic mixed with cat temple motif, electric sparks, 96x48 pixel sprite per floor segment, transparent background, sharp edges, aliased, flat shading, no gradients, no anti-aliasing, game asset
 ```
 
 ### Tower Stacking Reference
 ```
-2D pixel art, side view diagram showing 5-floor modular cat tower stacking system, floor 1 is cat tree foundation with scratching post (largest and sturdiest), floors 2-4 are cat platform middle segments with weapons mounted, floor 5 is rooftop with cat flag and special decoration, each floor is a separate stackable piece like a real cat tree, 96x320 total height, transparent background, sharp edges, aliased, flat shading, no gradients, no anti-aliasing
+2D pixel art, side view diagram showing 5-floor modular cat tower stacking system, floor 1 is cat tree foundation with scratching post (largest and sturdiest), floors 2-4 are cat platform middle segments with weapons mounted, floor 5 is rooftop with cat flag and special decoration, each floor is a separate stackable piece like a real cat tree, 96x240 total height, transparent background, sharp edges, aliased, flat shading, no gradients, no anti-aliasing
 ```
 
 ---
@@ -251,4 +251,4 @@
 5. **Sprite Sheet:** AI cannot reliably generate multi-frame sprite sheets — generate individual poses and assemble manually
 6. **Color Palette:** Extract Cheese Cat's palette after finalizing, reference those exact hex codes in subsequent prompts for visual consistency
 7. **Cat Identity:** Every man-made structure in this world was built by cats — always include cat furniture / cat toy elements in towers, buildings, and UI
-8. **Tower Floor Height:** Each tower floor is 96x64 px — tall enough for decorative detail (cat beds, scratching posts, weapon mounts)
+8. **Tower Floor Height:** Each tower floor is 96x48 px — tall enough for decorative detail (cat beds, scratching posts, weapon mounts)

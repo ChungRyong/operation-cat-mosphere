@@ -34,13 +34,13 @@
 
 ## 2. Towers (3 types x 5 floors)
 
-**Structure:** Separate per-floor sprites stacked vertically in code. Floor 5 (rooftop) has unique decoration.
+**Structure:** Separate per-floor sprites stacked vertically in code. Each floor is a cat tree segment with weapon mounted. Floor 1 (foundation) is sturdiest with scratching post base. Floor 5 (rooftop) has unique decoration with cat flag.
 
 | Item | Value |
 |------|-------|
-| Logical Size | 48x12 px per floor (code: half 24, floor height 12) |
-| Sprite Size | **96x24 px per floor** |
-| Full Stack (5F) | 96x120 px |
+| Logical Size | 48x24 px per floor (code: half 24, floor height 24) |
+| Sprite Size | **96x48 px per floor** |
+| Full Stack (5F) | 96x240 px |
 | Pivot | Center-bottom (foundation base) |
 
 ### 2-1. Fish Bone Launcher (Low-tech)
