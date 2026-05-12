@@ -26,7 +26,7 @@
     * 하중 = 현재 총 층수. 내구 임계값 = 토대 HP의 40%.
     * 토대 HP가 임계값 이하로 떨어지면 최상층부터 1층씩 붕괴 (2초 간격).
     * 붕괴된 층은 파괴되며 자원 반환 없음.
-    * Elite(Steel Can Gate) 충격 공격: 토대에 ATK × 2 = 고정 50 데미지 (일반 적은 타워를 공격하지 않음).
+    * 타워 공격 적(Steel Can Gate, Plasma Drone, Iron Express 등): 토대에 고정 데미지 (일반 적은 타워를 공격하지 않음).
 
 > **적층 비용 예시 (Fish Bone, 건설 비용 60):** 1층 60 → 2층 +60 → 3층 +60 → 4층 +60 → 5층 +60 = 풀스택 총 300 Scrap
 
@@ -41,13 +41,49 @@
 * **Ultimate (치즈냥이의 포효):** 화면 전체 ATK × 10 = 100 데미지 + 5초 무적, 1스테이지당 1회
 
 ### 2.2 Tower Stat Table
-| Tower | Type | HP | ATK | Fire Rate | Range | DPS | Build Cost | Repair Cost |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Fish Bone Launcher** | Low-tech | 150 | 5 | 2.0/s | 10 | 10.0 | 60 Scrap | 20 Scrap |
-| **Plasma Laser** | Hi-tech | 120 | 8 | 1.0/s | 12 | 8.0 | 80 Scrap | 30 Scrap |
-| **Mjolnir Coil** | Mystic | 100 | 12 | 0.6/s | 8 | 7.2 | 100 Scrap | 35 Scrap |
 
-> **설계 의도:** Low-tech = 연사 DPS형, Hi-tech = 장거리 관통형, Mystic = 저연사 고데미지 + 스턴(0.5초, 10초 쿨다운)
+각 Attack Type별 단일타겟형(기본)과 다중타겟형(해금) 2종씩, 총 6종으로 구성됩니다.
+
+#### 기본 타워 (Map 01~)
+| Tower | Type | HP | ATK | Fire Rate | Range | DPS(1체) | Build Cost | Repair Cost |
+| :--- | :--- | ---: | ---: | :--- | ---: | ---: | :--- | :--- |
+| **Fish Bone Launcher** | Low-tech | 150 | 5 | 2.0/s | 150 | 10.0 | 60 Scrap | 20 Scrap |
+| **Plasma Laser** | Hi-tech | 120 | 8 | 1.0/s | 180 | 8.0 | 80 Scrap | 30 Scrap |
+| **Mjolnir Coil** | Mystic | 100 | 12 | 0.6/s | 120 | 7.2 | 100 Scrap | 35 Scrap |
+
+> **설계 의도:** Fish Bone = 연사 단일타겟 DPS, Plasma = 장거리 정밀 사격, Mjolnir = 저연사 고데미지 + 스턴(0.5초, 10초 쿨다운)
+
+#### 해금 타워
+| Tower | Type | HP | ATK | Fire Rate | Range | DPS(1체) | Build Cost | Repair Cost | 해금 |
+| :--- | :--- | ---: | ---: | :--- | ---: | ---: | :--- | :--- | :--- |
+| **Hairball Mortar** | Low-tech | 130 | 8 | 0.6/s | 120 | 4.8 | 80 Scrap | 25 Scrap | Map 02 |
+| **Prism Array** | Hi-tech | 100 | 6 | 0.8/s | 150 | 4.8 | 100 Scrap | 35 Scrap | Map 04 |
+| **Spirit Lantern** | Mystic | 90 | 7 | 0.8/s | 130 | 5.6 | 120 Scrap | 40 Scrap | Map 06 |
+
+> **설계 의도:** 해금 타워는 단일타겟 DPS가 기본 타워 대비 낮으나(40~60%), 다중타겟 특성으로 보상합니다. 같은 Attack Type 내에서 "엘리트 1체 집중 vs 물량 다수 소탕"의 선택지를 제공합니다.
+
+### 2.2.1 Tower Mechanic Details
+
+#### Hairball Mortar (Low-tech AoE)
+* **폭발 반경:** 60px. 범위 내 모든 적에게 동일 데미지를 가합니다.
+* **투사체:** 포물선 궤적, 속도 300 (Fish Bone의 500보다 느림).
+* **역할:** Swarm 소탕 특화. Jelly Sprinter(SPD 4.5) 밀집 투입 시 핵심 대응.
+* **밸런스:** Slime 5기 밀집 시 8 × 1.0x × 5체 × 0.6/s = 24.0 유효 DPS (Fish Bone 10.0의 2.4배). 단일 엘리트에는 DPS 4.8로 Fish Bone 대비 절반 이하.
+* **적층 시너지:** 사거리 120 → 5층 시 192px. 크릿(2.0x) 시 16 × 범위 적중 = 대규모 피해.
+
+#### Prism Array (Hi-tech Pierce)
+* **관통 빔:** 사거리 끝까지 직선 관통, 경로 위 모든 적에게 동일 데미지.
+* **투사체:** 즉발 빔.
+* **Mirror 위험:** 빔 경로 상 Mirror 적 적중 시 **반사 발동** — 이후 관통 중단, 타워에 피해 귀환.
+* **역할:** 종대 편대(한 줄 진격) 관통. Normal 밀집 시 극히 유효.
+* **밸런스:** Normal 3체 관통 시 6 × 1.5x × 3체 × 0.8/s = 21.6 유효 DPS (Plasma 12.0의 1.8배). Mirror 1기라도 섞이면 반사 위험 → 편대 구성 확인 후 배치 판단 필수.
+
+#### Spirit Lantern (Mystic Chain + Detection)
+* **체인 번개:** 주 타겟 적중 후 80px 이내 적 2체에 순차 연쇄. 바운스당 데미지 70% 감쇠 (1차: 7 → 2차: 4.9 → 3차: 3.4, 총 15.3/발).
+* **투사체:** 속도 700 (번개).
+* **은신 감지:** 사거리 내 Shadow Jelly를 자동 감지하여 타겟 가능. 감지된 적은 다른 타워도 공격할 수 있습니다.
+* **역할:** 혼합 웨이브 대응 + Shadow Jelly 카운터.
+* **밸런스:** Steel Can 3체 연쇄 시 15.3 × 1.5x × 0.8/s = 18.4 유효 DPS (Mjolnir 10.8의 1.7배). 스턴 없음(Mjolnir 고유) — 단일 보스/엘리트에는 Mjolnir가 우위.
 
 ### 2.3 Enemy Stat Table
 
