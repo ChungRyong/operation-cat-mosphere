@@ -32,9 +32,9 @@
 
 ---
 
-## 2. Towers (3 types x 5 floors)
+## 2. Towers (3 types x 5 floors x 2 variants)
 
-**Structure:** Separate per-floor sprites stacked vertically in code. Each floor is a cat tree segment with weapon mounted. Floor 1 (foundation) is sturdiest with scratching post base. Floor 5 (rooftop) has unique decoration with cat flag.
+**Structure:** Separate per-floor sprites stacked vertically in code. Each floor has a unique visual per position (1F~5F). Every floor has **2 variants**: Top (최고층 — roof cap) and Stackable (위에 층 있음 — open top). Code selects the variant based on whether the floor is currently the topmost.
 
 | Item | Value |
 |------|-------|
@@ -42,10 +42,46 @@
 | Sprite Size | **96x48 px per floor** |
 | Full Stack (5F) | 96x240 px |
 | Pivot | Center-bottom (foundation base) |
+| Variants per floor | 2 (Top / Stackable) |
+| Total sprites | 3 types x 5 floors x 2 variants = **30** |
+
+### Floor Visual Guide
+
+| Floor | Role | Design Notes |
+|-------|------|-------------|
+| 1F | Foundation | Scratching post base, sturdiest structure, ground contact |
+| 2F | Lower body | Lower weapon mount, structural support |
+| 3F | Mid body | Main weapon platform, core identity |
+| 4F | Upper body | Upper weapon mount, height advantage |
+| 5F | Rooftop | Crown decoration, cat flag, antenna/finial |
+
+### Variant Rules
+
+| Variant | When | Visual |
+|---------|------|--------|
+| **Top** | This floor is the highest built floor | Roof cap / decoration on top, closed upper surface |
+| **Stackable** | Another floor exists above this one | Open/flat upper surface, visible connection joint |
+
+### Stacking Examples
+
+```
+1F only:  [1F-Top]
+2F tower: [2F-Top] + [1F-Stackable]
+3F tower: [3F-Top] + [2F-Stackable] + [1F-Stackable]
+5F tower: [5F-Top] + [4F-Stackable] + [3F-Stackable] + [2F-Stackable] + [1F-Stackable]
+```
 
 ### 2-1. Fish Bone Launcher (Low-tech)
 
-**Design:** DIY launcher made of wood/cardboard, fires fish bones. Crude and handmade aesthetic.
+**Design:** DIY launcher made of wood/cardboard, fires fish bones. Crude and handmade aesthetic. Cat tree base with scratching post texture, cardboard box body, yarn decorations.
+
+| Floor | Top Variant | Stackable Variant |
+|-------|-------------|-------------------|
+| 1F | Scratching post base + cardboard roof cap | Scratching post base, open top |
+| 2F | Lower cardboard box + yarn roof | Lower cardboard box, flat top joint |
+| 3F | Fish bone catapult arm + box roof | Fish bone catapult arm, open top |
+| 4F | Ammo basket (fish bones) + lid cap | Ammo basket, open top |
+| 5F | Lookout post + cat paw flag | Lookout post, flat top joint |
 
 | Animation | Frames | FPS | Description |
 |-----------|--------|-----|-------------|
@@ -56,7 +92,15 @@
 
 ### 2-2. Plasma Laser (Hi-tech)
 
-**Design:** Sleek metal/LED device firing laser beams. Blue glow, futuristic look.
+**Design:** Sleek metal/LED device firing laser beams. Blue glow, futuristic look. Luxury cat tree platform base, metallic body, LED strips, cat ear satellite dish.
+
+| Floor | Top Variant | Stackable Variant |
+|-------|-------------|-------------------|
+| 1F | Metal platform base + dome cap | Metal platform base, open top |
+| 2F | Power core (cat toy ball) + panel cap | Power core, flat top connector |
+| 3F | Laser turret barrel + sensor dome | Laser turret barrel, open top |
+| 4F | LED strip array + shield cap | LED strip array, open top |
+| 5F | Cat ear satellite dish + antenna | Cat ear dish, flat top connector |
 
 | Animation | Frames | FPS | Description |
 |-----------|--------|-----|-------------|
@@ -67,7 +111,15 @@
 
 ### 2-3. Mjolnir Coil (Mystic)
 
-**Design:** Mystical coil emitting purple lightning. Heavy, arcane feeling with electric sparks.
+**Design:** Mystical coil emitting purple lightning. Heavy, arcane feeling with electric sparks. Ancient cat shrine base, paw rune symbols, cat bell finial.
+
+| Floor | Top Variant | Stackable Variant |
+|-------|-------------|-------------------|
+| 1F | Stone shrine base + shrine roof cap | Stone shrine base, open top |
+| 2F | Rune-carved pillar + ward cap | Rune-carved pillar, flat top joint |
+| 3F | Tesla coil core + lightning dome | Tesla coil core, open top |
+| 4F | Purple crystal array + cap stone | Purple crystal array, open top |
+| 5F | Cat bell finial + lightning rod | Cat bell, flat top connector |
 
 | Animation | Frames | FPS | Description |
 |-----------|--------|-----|-------------|
@@ -204,7 +256,7 @@
 | Category | Count | Est. Frames |
 |----------|-------|-------------|
 | Hero | 1 | ~26 |
-| Tower | 3 types x 5 floors | ~45 (15 floors + 30 anim) |
+| Tower | 3 types x 5 floors x 2 variants = 30 sprites | ~90 (30 base + 60 anim) |
 | Enemy | 6 | ~60 |
 | Boss | 1 | ~27 |
-| **Total** | **12 entities** | **~158 frames** |
+| **Total** | **12 entities (30 tower sprites)** | **~203 frames** |

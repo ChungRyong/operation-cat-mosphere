@@ -41,26 +41,169 @@
 
 ## 2. Towers (Cat-Built Defense Line)
 
-> All towers are built by cats — every tower is mounted on a **cat tree / cat furniture base**. Each floor segment is **96x48 px** for visible stacking detail. Cat-themed decorations (paw prints, cat ears, scratching post texture) are essential.
+> All towers are built by cats — every tower is mounted on a **cat tree / cat furniture base**. Each floor segment is **96x48 px**. Each floor has **2 variants**: **Top** (roof cap, closed top) and **Stackable** (open top for stacking). Cat-themed decorations (paw prints, cat ears, scratching post texture) are essential.
+>
+> **Naming convention:** `{tower}_{floor}_{variant}` — e.g. `fishbone_1f_top`, `plasma_3f_stackable`
 
 ### 2-1. Fish Bone Launcher (Low-tech)
+
+#### 1F Foundation — Top
 ```
-2D pixel art game tower, top-down view, DIY fish bone catapult mounted on a scratching post cat tree base, cardboard box body with cat paw prints stamped on it, loaded with a fish bone projectile, yarn string trigger mechanism, crude handmade look, brown and tan colors, 96x48 pixel sprite per floor segment, transparent background, sharp edges, aliased, flat shading, no gradients, no anti-aliasing, game asset
+2D pixel art game tower floor, side view, DIY cat scratching post foundation base, sturdy wooden frame wrapped in sisal rope, cardboard box walls with cat paw prints stamped on, small fish bone decoration on roof cap, crude handmade look, brown and tan colors, closed rooftop with cardboard lid, 96x48 pixel sprite, transparent background, sharp edges, aliased, flat shading, no gradients, no anti-aliasing, game asset
+```
+
+#### 1F Foundation — Stackable
+```
+2D pixel art game tower floor, side view, DIY cat scratching post foundation base, sturdy wooden frame wrapped in sisal rope, cardboard box walls with cat paw prints stamped on, open flat top with visible wooden beam connectors for stacking, crude handmade look, brown and tan colors, 96x48 pixel sprite, transparent background, sharp edges, aliased, flat shading, no gradients, no anti-aliasing, game asset
+```
+
+#### 2F Lower — Top
+```
+2D pixel art game tower floor, side view, cardboard box segment with yarn ball decorations, fish bone storage shelf visible inside, small wooden plank roof cap on top, crude DIY look, brown and tan colors, 96x48 pixel sprite, transparent background, sharp edges, aliased, flat shading, no gradients, no anti-aliasing, game asset
+```
+
+#### 2F Lower — Stackable
+```
+2D pixel art game tower floor, side view, cardboard box segment with yarn ball decorations, fish bone storage shelf visible inside, open flat top with wooden beam connectors, crude DIY look, brown and tan colors, 96x48 pixel sprite, transparent background, sharp edges, aliased, flat shading, no gradients, no anti-aliasing, game asset
+```
+
+#### 3F Mid — Top
+```
+2D pixel art game tower floor, side view, main fish bone catapult weapon platform, wooden slingshot arm loaded with fish bone projectile, yarn string trigger mechanism, cardboard ammo box beside launcher, small wooden roof cap on top, brown and tan colors, 96x48 pixel sprite, transparent background, sharp edges, aliased, flat shading, no gradients, no anti-aliasing, game asset
+```
+
+#### 3F Mid — Stackable
+```
+2D pixel art game tower floor, side view, main fish bone catapult weapon platform, wooden slingshot arm loaded with fish bone projectile, yarn string trigger mechanism, cardboard ammo box beside launcher, open flat top with connectors, brown and tan colors, 96x48 pixel sprite, transparent background, sharp edges, aliased, flat shading, no gradients, no anti-aliasing, game asset
+```
+
+#### 4F Upper — Top
+```
+2D pixel art game tower floor, side view, fish bone ammo basket storage, pile of fish bones and sardine cans, wooden crate walls with cat scratch marks, small plank roof cap with dried fish hanging, brown and tan colors, 96x48 pixel sprite, transparent background, sharp edges, aliased, flat shading, no gradients, no anti-aliasing, game asset
+```
+
+#### 4F Upper — Stackable
+```
+2D pixel art game tower floor, side view, fish bone ammo basket storage, pile of fish bones and sardine cans, wooden crate walls with cat scratch marks, open flat top with connectors, brown and tan colors, 96x48 pixel sprite, transparent background, sharp edges, aliased, flat shading, no gradients, no anti-aliasing, game asset
+```
+
+#### 5F Rooftop — Top
+```
+2D pixel art game tower floor, side view, lookout post rooftop with cat paw flag waving, small fish bone wind vane, wooden railing with yarn garland, proud DIY cat tower crown piece, brown and tan colors with colorful flag, 96x48 pixel sprite, transparent background, sharp edges, aliased, flat shading, no gradients, no anti-aliasing, game asset
+```
+
+#### 5F Rooftop — Stackable
+```
+2D pixel art game tower floor, side view, lookout post level with wooden railing, small fish bone decorations, yarn garland hanging, open flat top with wooden beam connectors, brown and tan colors, 96x48 pixel sprite, transparent background, sharp edges, aliased, flat shading, no gradients, no anti-aliasing, game asset
 ```
 
 ### 2-2. Plasma Laser (Hi-tech)
+
+#### 1F Foundation — Top
 ```
-2D pixel art game tower, top-down view, high-tech laser turret mounted on a luxury cat tree platform base, metallic silver body with glowing blue LED strips, cat ear shaped satellite dish on top, cat toy ball as energy core, sci-fi design blended with cat furniture aesthetic, blue energy glow, 96x48 pixel sprite per floor segment, transparent background, sharp edges, aliased, flat shading, no gradients, no anti-aliasing, game asset
+2D pixel art game tower floor, side view, luxury cat tree metal platform base, sleek silver frame with blue LED strip lights along edges, reinforced steel floor plate, small dome sensor cap on top sealed roof, sci-fi cat furniture aesthetic, silver and blue glow colors, 96x48 pixel sprite, transparent background, sharp edges, aliased, flat shading, no gradients, no anti-aliasing, game asset
+```
+
+#### 1F Foundation — Stackable
+```
+2D pixel art game tower floor, side view, luxury cat tree metal platform base, sleek silver frame with blue LED strip lights along edges, reinforced steel floor plate, open flat top with metal rail connectors for stacking, sci-fi cat furniture aesthetic, silver and blue glow colors, 96x48 pixel sprite, transparent background, sharp edges, aliased, flat shading, no gradients, no anti-aliasing, game asset
+```
+
+#### 2F Lower — Top
+```
+2D pixel art game tower floor, side view, power core chamber with glowing cat toy ball energy source inside glass case, blue pulsing light, metal panels with circuit patterns, small tech dome cap on top, silver and neon blue colors, 96x48 pixel sprite, transparent background, sharp edges, aliased, flat shading, no gradients, no anti-aliasing, game asset
+```
+
+#### 2F Lower — Stackable
+```
+2D pixel art game tower floor, side view, power core chamber with glowing cat toy ball energy source inside glass case, blue pulsing light, metal panels with circuit patterns, open flat top with metal rail connectors, silver and neon blue colors, 96x48 pixel sprite, transparent background, sharp edges, aliased, flat shading, no gradients, no anti-aliasing, game asset
+```
+
+#### 3F Mid — Top
+```
+2D pixel art game tower floor, side view, main plasma laser turret barrel protruding from side, focusing lens with blue energy charge glow, holographic targeting display, metal body with LED indicators, small sensor dome cap on top, silver and bright blue colors, 96x48 pixel sprite, transparent background, sharp edges, aliased, flat shading, no gradients, no anti-aliasing, game asset
+```
+
+#### 3F Mid — Stackable
+```
+2D pixel art game tower floor, side view, main plasma laser turret barrel protruding from side, focusing lens with blue energy charge glow, holographic targeting display, metal body with LED indicators, open flat top with metal connectors, silver and bright blue colors, 96x48 pixel sprite, transparent background, sharp edges, aliased, flat shading, no gradients, no anti-aliasing, game asset
+```
+
+#### 4F Upper — Top
+```
+2D pixel art game tower floor, side view, LED strip array emitting blue light, sensor panels and cooling vents, energy conduit tubes glowing blue, small shield dome cap on top, sleek silver body, silver and blue colors, 96x48 pixel sprite, transparent background, sharp edges, aliased, flat shading, no gradients, no anti-aliasing, game asset
+```
+
+#### 4F Upper — Stackable
+```
+2D pixel art game tower floor, side view, LED strip array emitting blue light, sensor panels and cooling vents, energy conduit tubes glowing blue, open flat top with metal connectors, sleek silver body, silver and blue colors, 96x48 pixel sprite, transparent background, sharp edges, aliased, flat shading, no gradients, no anti-aliasing, game asset
+```
+
+#### 5F Rooftop — Top
+```
+2D pixel art game tower floor, side view, cat ear shaped satellite dish antenna on top, rotating radar sensor, holographic blue beacon light, sleek futuristic crown piece of high-tech cat tower, silver and bright blue glow colors, 96x48 pixel sprite, transparent background, sharp edges, aliased, flat shading, no gradients, no anti-aliasing, game asset
+```
+
+#### 5F Rooftop — Stackable
+```
+2D pixel art game tower floor, side view, small satellite receiver and sensor array, blue LED indicators, metal body with ventilation grills, open flat top with metal rail connectors, silver and blue colors, 96x48 pixel sprite, transparent background, sharp edges, aliased, flat shading, no gradients, no anti-aliasing, game asset
 ```
 
 ### 2-3. Mjolnir Coil (Mystic)
+
+#### 1F Foundation — Top
 ```
-2D pixel art game tower, top-down view, mystical tesla coil tower mounted on an ancient cat shrine base, dark purple metal with bright purple lightning arcs, cat paw rune symbols carved on base, cat bell hanging from coil tip, magical arcane aesthetic mixed with cat temple motif, electric sparks, 96x48 pixel sprite per floor segment, transparent background, sharp edges, aliased, flat shading, no gradients, no anti-aliasing, game asset
+2D pixel art game tower floor, side view, ancient cat shrine stone base, heavy dark stone blocks with carved cat paw rune symbols glowing faintly purple, small shrine roof cap with ward stone on top, mystical arcane cat temple aesthetic, dark purple and grey stone colors, 96x48 pixel sprite, transparent background, sharp edges, aliased, flat shading, no gradients, no anti-aliasing, game asset
+```
+
+#### 1F Foundation — Stackable
+```
+2D pixel art game tower floor, side view, ancient cat shrine stone base, heavy dark stone blocks with carved cat paw rune symbols glowing faintly purple, open flat top with stone pillar connectors for stacking, mystical arcane cat temple aesthetic, dark purple and grey stone colors, 96x48 pixel sprite, transparent background, sharp edges, aliased, flat shading, no gradients, no anti-aliasing, game asset
+```
+
+#### 2F Lower — Top
+```
+2D pixel art game tower floor, side view, rune-carved stone pillar segment, glowing purple mystic symbols etched into surface, small floating ward stones, stone ward cap on top, dark purple and grey colors with purple glow, 96x48 pixel sprite, transparent background, sharp edges, aliased, flat shading, no gradients, no anti-aliasing, game asset
+```
+
+#### 2F Lower — Stackable
+```
+2D pixel art game tower floor, side view, rune-carved stone pillar segment, glowing purple mystic symbols etched into surface, small floating ward stones, open flat top with stone connectors, dark purple and grey colors with purple glow, 96x48 pixel sprite, transparent background, sharp edges, aliased, flat shading, no gradients, no anti-aliasing, game asset
+```
+
+#### 3F Mid — Top
+```
+2D pixel art game tower floor, side view, main tesla coil core with copper winding, bright purple lightning arcs crackling from coil, energy orb at center, mystic circuit patterns on housing, small lightning dome cap on top, dark purple metal with bright purple electricity, 96x48 pixel sprite, transparent background, sharp edges, aliased, flat shading, no gradients, no anti-aliasing, game asset
+```
+
+#### 3F Mid — Stackable
+```
+2D pixel art game tower floor, side view, main tesla coil core with copper winding, bright purple lightning arcs crackling from coil, energy orb at center, mystic circuit patterns on housing, open flat top with connectors, dark purple metal with bright purple electricity, 96x48 pixel sprite, transparent background, sharp edges, aliased, flat shading, no gradients, no anti-aliasing, game asset
+```
+
+#### 4F Upper — Top
+```
+2D pixel art game tower floor, side view, purple crystal array cluster, multiple glowing amethyst crystals jutting outward, electric sparks between crystals, stone housing with rune carvings, cap stone with crystal on top, dark purple and violet glow colors, 96x48 pixel sprite, transparent background, sharp edges, aliased, flat shading, no gradients, no anti-aliasing, game asset
+```
+
+#### 4F Upper — Stackable
+```
+2D pixel art game tower floor, side view, purple crystal array cluster, multiple glowing amethyst crystals jutting outward, electric sparks between crystals, stone housing with rune carvings, open flat top with stone connectors, dark purple and violet glow colors, 96x48 pixel sprite, transparent background, sharp edges, aliased, flat shading, no gradients, no anti-aliasing, game asset
+```
+
+#### 5F Rooftop — Top
+```
+2D pixel art game tower floor, side view, sacred cat bell finial hanging from ornate bracket, lightning rod with purple electric arcs, mystical beacon light, ancient cat shrine crown piece with ward symbols, dark purple and gold accent colors, 96x48 pixel sprite, transparent background, sharp edges, aliased, flat shading, no gradients, no anti-aliasing, game asset
+```
+
+#### 5F Rooftop — Stackable
+```
+2D pixel art game tower floor, side view, small ward stone pedestal, purple rune circle on surface, faint electric sparks, stone body with carved symbols, open flat top with stone pillar connectors, dark purple and grey colors, 96x48 pixel sprite, transparent background, sharp edges, aliased, flat shading, no gradients, no anti-aliasing, game asset
 ```
 
 ### Tower Stacking Reference
 ```
-2D pixel art, side view diagram showing 5-floor modular cat tower stacking system, floor 1 is cat tree foundation with scratching post (largest and sturdiest), floors 2-4 are cat platform middle segments with weapons mounted, floor 5 is rooftop with cat flag and special decoration, each floor is a separate stackable piece like a real cat tree, 96x240 total height, transparent background, sharp edges, aliased, flat shading, no gradients, no anti-aliasing
+2D pixel art, side view diagram showing 5-floor modular cat tower stacking system, each floor is 96x48 pixels, floor 1 is cat tree foundation with scratching post (largest and sturdiest), floors 2-4 are middle segments with weapons mounted, floor 5 is rooftop with cat flag and special decoration, show two columns side by side: left column shows all 5 floors with Top variant (roof caps), right column shows all 5 floors with Stackable variant (open tops), 96x240 total height per column, transparent background, sharp edges, aliased, flat shading, no gradients, no anti-aliasing
 ```
 
 ---
