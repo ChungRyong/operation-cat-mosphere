@@ -50,17 +50,50 @@
 > **설계 의도:** Low-tech = 연사 DPS형, Hi-tech = 장거리 관통형, Mystic = 저연사 고데미지 + 스턴(0.5초, 10초 쿨다운)
 
 ### 2.3 Enemy Stat Table
-| Unit | Class | HP | SPD | Essence | Mechanism |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **Jelly Slime** | Swarm | 20 | 2.5 | 1 | 가장 기본적인 물량 개체입니다. |
-| **Jelly Carrier** | Swarm | 100 | 1.5 | 10 | 처치 시 꼬마 슬라임 5마리를 생성합니다. |
-| **Laser Pointer** | Gimmick | 60 | 2.0 | 15 | 타워의 시선을 분산시키는 기믹을 가집니다. |
-| **Mirror Craft** | Counter | 80 | 3.0 | 20 | 하이테크 레이저 공격을 반사합니다. |
-| **Steel Can Gate** | Elite | 400 | 1.0 | 50 | 높은 방어력을 가진 탱크형 유닛입니다. |
-| *(꼬마 슬라임)* | Swarm | 8 | 3.0 | 0 | Jelly Carrier 처치 시 생성, 보상 없음 |
 
-> **Defense Type 분류:** Normal = Jelly Slime, Jelly Carrier, Laser Pointer, 꼬마 슬라임 / Mirror = Mirror Craft / Steel Can = Steel Can Gate
-> 향후 적 추가 시 Defense Type(Normal, Mirror, Steel Can) 중 하나를 부여하여 배율표를 적용합니다.
+**Enemy Class:** Swarm, Gimmick, Counter, Elite, Support
+**Defense Type:** Normal, Mirror, Steel Can — 배율표(§2.4) 적용
+
+#### 기본 로스터 (Map 01~)
+| Unit | Class | Defense | HP | SPD | Essence | Mechanism |
+| :--- | :--- | :--- | ---: | ---: | ---: | :--- |
+| **Jelly Slime** | Swarm | Normal | 20 | 2.5 | 1 | 기본 물량 개체 |
+| **Jelly Carrier** | Swarm | Normal | 100 | 1.5 | 10 | 처치 시 꼬마 슬라임 5마리 생성 |
+| **Laser Pointer** | Gimmick | Normal | 60 | 2.0 | 15 | 타워 시선 분산 (어그로 강제) |
+| **Mirror Craft** | Counter | Mirror | 80 | 3.0 | 20 | Hi-tech 공격 반사 |
+| **Steel Can Gate** | Elite | Steel Can | 400 | 1.0 | 50 | 타워 공격 (50 고정 데미지) |
+| *(꼬마 슬라임)* | Swarm | Normal | 8 | 3.0 | 0 | Carrier 파생, 보상 없음 |
+
+#### Tier 1 — Map 02~03 합류
+| Unit | Class | Defense | HP | SPD | Essence | Mechanism |
+| :--- | :--- | :--- | ---: | ---: | ---: | :--- |
+| **Jelly Sprinter** | Swarm | Normal | 12 | 4.5 | 2 | 초고속 돌파형 (§2.5.1) |
+| **Gel Medic** | Support | Normal | 50 | 1.8 | 12 | 주변 아군 HP 회복 (§2.5.2) |
+| **Shadow Jelly** | Gimmick | Normal | 35 | 2.0 | 8 | 근접까지 은신, 타겟 불가 (§2.5.3) |
+
+#### Tier 2 — Map 04~06 합류
+| Unit | Class | Defense | HP | SPD | Essence | Mechanism |
+| :--- | :--- | :--- | ---: | ---: | ---: | :--- |
+| **Plasma Drone** | Counter | Mirror | 70 | 2.5 | 25 | 비행 + 타워 원거리 공격 (§2.5.4) |
+| **Gel Bomber** | Gimmick | Normal | 45 | 2.0 | 10 | 사망 시 슬로우 장판 생성 (§2.5.5) |
+| **Volt Jelly** | Counter | Steel Can | 60 | 2.5 | 18 | 사망 시 전기 폭발, 타워 피해 (§2.5.6) |
+
+#### Tier 3 — Map 07~09 합류
+| Unit | Class | Defense | HP | SPD | Essence | Mechanism |
+| :--- | :--- | :--- | ---: | ---: | ---: | :--- |
+| **Storm Caller** | Support | Mirror | 90 | 1.5 | 30 | 주변 아군 속도 버프 오라 (§2.5.7) |
+| **Cage Jelly** | Gimmick | Steel Can | 120 | 2.8 | 25 | 영웅 접촉 시 이동 구속 (§2.5.8) |
+| **Iron Express** | Elite | Steel Can | 300 | 1.5 | 60 | 주기적 돌진, 타워 대형 피해 (§2.5.9) |
+
+#### Tier 4 — Map 10~12 합류
+| Unit | Class | Defense | HP | SPD | Essence | Mechanism |
+| :--- | :--- | :--- | ---: | ---: | ---: | :--- |
+| **Phase Shifter** | Counter | Mirror | 100 | 2.0 | 35 | 피격 누적 시 순간이동 (§2.5.10) |
+| **Queen Jelly** | Elite | Normal | 250 | 0.8 | 80 | 생존 중 꼬마 슬라임 지속 생산 (§2.5.11) |
+| **Gravity Blob** | Elite | Steel Can | 350 | 1.2 | 70 | 투사체 빗나감 중력장 (§2.5.12) |
+
+> **Defense Type 분포:** Normal 9종 / Mirror 4종 / Steel Can 5종
+> **역할 분포:** Swarm 4종 / Gimmick 5종 / Counter 4종 / Elite 4종 / Support 2종
 
 ### 2.4 Damage Multiplier Matrix
 | Attack \ Defense | Normal | Mirror | Steel Can |
@@ -68,6 +101,73 @@
 | **Low-tech (Physical)** | 1.0x | 1.5x | 0.5x |
 | **Hi-tech (Laser)** | 1.5x | **-1.0x (Reflect)** | 0.2x |
 | **Mystic (Lightning)** | 1.0x | 1.2x | 1.5x |
+
+### 2.5 Enemy Mechanic Details
+
+#### 2.5.1 Jelly Sprinter
+* **역할:** 초고속 돌파. 타워 사각지대와 교전 중 빈틈을 이용해 기지에 도달합니다.
+* **밸런스:** Fish Bone 사거리(150px) 내 체류 ≈ 0.56초 → 1~2발 사격 가능. HP 12로 2발 이상 필요하여 밀집 투입 시 누수가 발생합니다.
+
+#### 2.5.2 Gel Medic
+* **치유량:** 5 HP/초
+* **치유 범위:** 100px
+* **자체 공격:** 없음
+* **역할:** Jelly Slime(HP 20)을 4초 만에 풀회복합니다. 우선 처치하지 않으면 물량 소모전에서 불리해집니다.
+* **밸런스:** Fish Bone 10 DPS vs HP 50 → 5초 소요. 그 동안 주변 적 약 35 HP를 회복합니다.
+
+#### 2.5.3 Shadow Jelly
+* **은신:** 타워 유효 사거리의 60% 이내 진입 시 은신이 해제됩니다. 해제 후에는 영구 가시 상태입니다.
+* **역할:** Fish Bone(150px) 기준 90px에서 가시화 → 체류 약 0.75초. HP 35로 생존 확률이 높습니다.
+* **대응:** 영웅 펀치(20 dmg)로 즉시 처리 가능하여, 영웅 포지셔닝의 중요도가 상승합니다.
+
+#### 2.5.4 Plasma Drone
+* **비행:** 경로(Path)를 무시하고 맵 가장자리에서 기지 방향으로 직선 이동합니다.
+* **타워 공격:** ATK 8, 간격 2.0초 (4 DPS). 사거리 내 가장 가까운 타워를 공격합니다.
+* **Mirror 방어:** Hi-tech 사용 시 자기 타워에 반사 피해 → Low-tech(1.5x) 또는 Mystic(1.2x) 사용 필수.
+* **밸런스:** Low-tech 실질 DPS 15 vs HP 70 → 4.7초 처치. 그 동안 타워에 약 18 피해.
+
+#### 2.5.5 Gel Bomber
+* **사망 장판:** 반경 60px, 지속 5초, 영웅 이동속도 -50%.
+* **역할:** 물량 진입 전 선발대로 투입하여 영웅 기동력을 제한합니다. 타워에는 영향 없습니다.
+
+#### 2.5.6 Volt Jelly
+* **사망 폭발:** 반경 100px, 타워에 30 고정 데미지.
+* **역할:** 타워 밀집 배치 시 페널티를 부여합니다. 분산 배치 또는 Mystic으로 원거리 격파하여 대응합니다.
+* **밸런스:** Steel Can 방어 — Low-tech 실질 HP 120, Hi-tech 실질 HP 300, **Mystic 실질 HP 40**. 폭발 30은 타워 HP(100~150)의 20~30%.
+
+#### 2.5.7 Storm Caller
+* **속도 오라:** 반경 120px 내 아군 SPD +50%.
+* **비 맵 강화:** Map 07(비 내리는 지붕 위)에서 오라 효과가 SPD +100%로 증폭됩니다.
+* **역할:** Slime SPD 2.5 → 3.75(일반) / 5.0(비 맵). 최우선 처치 대상입니다.
+* **밸런스:** Mirror 방어 — Low-tech 1.5x(실질 HP 60), Mystic 1.2x(실질 HP 75).
+
+#### 2.5.8 Cage Jelly
+* **구속:** 영웅에게 접촉 시 2초간 이동 불가.
+* **구속 쿨다운:** 8초.
+* **역할:** 물량과 동시 투입하여 영웅을 무력화합니다. 패링/궁극기 타이밍 관리를 강요합니다.
+* **밸런스:** Steel Can 방어 — Mystic 1.5x(실질 HP 80), Low-tech 0.5x(실질 HP 240).
+
+#### 2.5.9 Iron Express
+* **통상 속도:** SPD 1.5
+* **돌진:** 10초 간격으로 SPD 6.0 돌진 발동. 경로 위 첫 번째 타워에 80 고정 데미지.
+* **역할:** Steel Can Gate의 상위 호환 위협. 돌진 타이밍에 맞춘 타워 수리/영웅 개입이 필요합니다.
+* **밸런스:** Steel Can 방어 — Mystic 실질 HP 200. Mjolnir 2기 집중(21.6 DPS) → 약 9.3초 처치. 그 동안 돌진 1회(80 dmg = 타워 HP의 53~80%).
+
+#### 2.5.10 Phase Shifter
+* **순간이동:** 피격 3회 누적 시 경로 전방 5% 지점으로 순간이동합니다.
+* **역할:** 연사형(Low-tech 2.0/s)은 1.5초마다 이동을 유발하고, 저연사형(Mystic 0.6/s)은 5초마다 유발합니다. **저연사 고데미지 타워가 유리합니다.**
+* **밸런스:** Low-tech 격파 시 약 7회 피격 → 이동 2회(경로 10% 단축). Mystic은 이동 1회 이하.
+
+#### 2.5.11 Queen Jelly
+* **지속 소환:** 3.0초 간격으로 꼬마 슬라임(HP 8)을 생성합니다. Carrier와 달리 사망이 아닌 생존 중 지속 생산합니다.
+* **역할:** SPD 0.8로 극저속이지만, 오래 생존할수록 슬라임이 기하급수적으로 누적됩니다.
+* **밸런스:** Normal 방어로 모든 공격 유형 유효. 총 DPS 80 기준 → 3.1초 처치(슬라임 약 1마리). DPS 40이면 → 6.3초 처치(슬라임 약 2마리).
+
+#### 2.5.12 Gravity Blob
+* **중력장:** 반경 120px 내 모든 투사체에 40% 빗나감(miss) 확률을 부여합니다.
+* **영웅 펀치:** 근접 공격은 miss 판정 미적용 → 영웅 직접 개입이 핵심 대응책입니다.
+* **역할:** 최종 맵의 최고 위협 개체. Map 12(달 기지)의 저중력 환경과 시너지를 형성합니다.
+* **밸런스:** Steel Can 방어 — 중력장 포함 실질 HP: Mystic 약 389, Low-tech 약 1,167. 영웅 없이는 처리가 극히 어렵습니다.
 
 ---
 
